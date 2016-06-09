@@ -1,0 +1,5 @@
+tpl_c/
+uploads/
+config/config*.php
+log/
+config/log4php.config.xml
