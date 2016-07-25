@@ -173,6 +173,8 @@ along with Booked Scheduler.  If not, see <http://www.gnu.org/licenses/>.
 
 <div style="clear:both;">&nbsp;</div>
 
+{block name="waitingList"}{/block}
+
 {if $RemindersEnabled}
 	<div class="reservationReminders">
 		<div id="reminderOptionsStart">

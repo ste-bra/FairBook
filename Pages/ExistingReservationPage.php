@@ -107,12 +107,18 @@ interface IExistingReservationPage extends IReservationPage
 	 * @param ReservationReminderInterval $reminderInterval
 	 */
 	public function SetEndReminder($reminderValue, $reminderInterval);
+
+	/**
+	 * @param array|ReservationWaitingList[] $waitingList
+	 */
+	function SetWaitingList($waitingList);
 }
 
 class ExistingReservationPage extends ReservationPage implements IExistingReservationPage
 {
 	protected $IsEditable = false;
 	protected $IsApprovable = false;
+	protected $hasWaitingList = false;
 
 	public function __construct()
 	{
@@ -130,13 +136,17 @@ class ExistingReservationPage extends ReservationPage implements IExistingReserv
 		$reservationViewRepository = new ReservationViewRepository();
 
 		return new EditReservationPresenter($this,
-											$this->initializationFactory,
-											$preconditionService,
-											$reservationViewRepository);
+			$this->initializationFactory,
+			$preconditionService,
+			$reservationViewRepository);
 	}
 
 	protected function GetTemplateName()
 	{
+		if ($this->hasWaitingList)
+		{
+			return 'Reservation/editWaitingList.tpl';
+		}
 		if ($this->IsApprovable)
 		{
 			return 'Reservation/approve.tpl';
@@ -257,6 +267,27 @@ class ExistingReservationPage extends ReservationPage implements IExistingReserv
 		$this->Set('ReminderTimeEnd', $reminderValue);
 		$this->Set('ReminderIntervalEnd', $reminderInterval);
 	}
+
+	/**
+	 * @param array|ReservationWaitingList[] $waitingList
+	 */
+	public function SetWaitingList($waitingList)
+	{
+		$this->Set('WaitingList', $waitingList);
+		if (count($waitingList) > 0)
+		{
+			$this->hasWaitingList = true;
+		}
+	}
+
+	/**
+	 * @param bool $amIOnWaitingList
+	 */
+	public function SetCurrentUserOnWaitingList($amIOnWaitingList)
+	{
+		$this->Set('IAmOnWaitingList', $amIOnWaitingList);
+	}
+
 }
 
 ?>

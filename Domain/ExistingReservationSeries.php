@@ -355,7 +355,14 @@ class ExistingReservationSeries extends ReservationSeries
 		{
 			Log::Debug("Removing series %s", $this->SeriesId());
 
-			$this->AddEvent(new SeriesDeletedEvent($this));
+			if ($this->IsUserOnWaitingList($deletedBy) && count($this->WaitingList()) > 1)
+			{
+				$this->AddEvent(new RemovedFromWaitingListEvent($this, $deletedBy->UserId));
+			}
+			else
+			{
+				$this->AddEvent(new SeriesDeletedEvent($this));
+			}
 		}
 	}
 

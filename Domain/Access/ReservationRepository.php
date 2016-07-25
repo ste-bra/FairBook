@@ -54,6 +54,7 @@ class ReservationRepository implements IReservationRepository
 		$this->PopulateAttributeValues($series);
 		$this->PopulateAttachmentIds($series);
 		$this->PopulateReminders($series);
+		$this->PopulateWaitingList($series);
 
 		return $series;
 	}
@@ -94,6 +95,9 @@ class ReservationRepository implements IReservationRepository
 
 				$database->Execute($updateReservationCommand);
 			}
+
+			$updateWaitingListCommand = new UpdateWaitingListCommand($currentId, $newSeriesId);
+			$database->Execute($updateWaitingListCommand);
 		}
 		else
 		{
@@ -107,6 +111,8 @@ class ReservationRepository implements IReservationRepository
 			{
 				$this->AddReservationAttachment($attachment);
 			}
+
+			$this->PersistWaitingList($reservationSeries, $database);
 		}
 
 		$this->ExecuteEvents($reservationSeries);
@@ -168,6 +174,8 @@ class ReservationRepository implements IReservationRepository
 			$database->Execute($insertAccessory);
 		}
 
+		$this->PersistWaitingList($reservationSeries, $database);
+
 		return $reservationSeriesId;
 	}
 
@@ -200,6 +208,27 @@ class ReservationRepository implements IReservationRepository
 	private function GetReservationCommand($event, $series)
 	{
 		return ReservationEventMapper::Instance()->Map($event, $series);
+	}
+
+	/**
+	 * @param ReservationSeries $reservationSeries
+	 * @param Database $database
+	 */
+	private function PersistWaitingList(ReservationSeries $reservationSeries, Database $database)
+	{
+		$entry = $reservationSeries->AddedToWaitingList();
+		if (isset($entry))
+		{
+			$addToWaitingListCommand = new AddToWaitingListCommand($reservationSeries->SeriesId(), $entry->UserId(), $entry->Title(), $entry->Description());
+			$database->Execute($addToWaitingListCommand);
+		}
+
+		$entry = $reservationSeries->EditedWaitingListEntry();
+		if (isset($entry))
+		{
+			$editWaitingListCommand = new EditWaitingListCommand($reservationSeries->SeriesId(), $entry->UserId(), $entry->Title(), $entry->Description());
+			$database->Execute($editWaitingListCommand);			
+		}
 	}
 
 	/// LOAD BY ID HELPER FUNCTIONS
@@ -351,6 +380,22 @@ class ReservationRepository implements IReservationRepository
 		$reader->Free();
 	}
 
+	/**
+	 * @param ExistingReservationSeries $series
+	 */
+	private function PopulateWaitingList(ExistingReservationSeries $series)
+	{
+		$getWaitingListCommand = new GetWaitingListCommand($series->SeriesId());
+		$result = ServiceLocator::GetDatabase()->Query($getWaitingListCommand);
+
+		while ($row = $result->GetRow())
+		{
+			$series->AddWaitingListEntry(new ReservationWaitingListEntry($row[ColumnNames::USER_ID],
+												$row[ColumnNames::RESERVATION_TITLE],
+												$row[ColumnNames::RESERVATION_DESCRIPTION]));
+		}
+	}
+
 	private function BuildRepeatOptions($repeatType, $configurationString)
 	{
 		$configuration = RepeatConfiguration::Create($repeatType, $configurationString);
@@ -381,7 +426,8 @@ class ReservationRepository implements IReservationRepository
 														$row[ColumnNames::FILE_SIZE],
 														$contents,
 														$row[ColumnNames::FILE_EXTENSION],
-														$row[ColumnNames::SERIES_ID]);
+														$row[ColumnNames::SERIES_ID],
+														$row[ColumnNames::USER_ID]);
 			$attachment->WithFileId($fileId);
 
 			return $attachment;
@@ -396,7 +442,7 @@ class ReservationRepository implements IReservationRepository
 	 */
 	public function AddReservationAttachment(ReservationAttachment $attachmentFile)
 	{
-		$command = new AddReservationAttachmentCommand($attachmentFile->FileName(), $attachmentFile->FileType(), $attachmentFile->FileSize(), $attachmentFile->FileExtension(), $attachmentFile->SeriesId());
+		$command = new AddReservationAttachmentCommand($attachmentFile->FileName(), $attachmentFile->FileType(), $attachmentFile->FileSize(), $attachmentFile->FileExtension(), $attachmentFile->SeriesId(), $attachmentFile->UserId());
 		$id = ServiceLocator::GetDatabase()->ExecuteInsert($command);
 		$extension = $attachmentFile->FileExtension();
 		$attachmentFile->WithFileId($id);
@@ -436,6 +482,8 @@ class ReservationEventMapper
 
 		$this->buildMethods['ReminderAddedEvent'] = 'BuildReminderAddedEvent';
 		$this->buildMethods['ReminderRemovedEvent'] = 'BuildReminderRemovedEvent';
+
+		$this->buildMethods['RemovedFromWaitingListEvent'] = 'BuildRemovedFromWaitingListEvent';
 	}
 
 	/**
@@ -538,6 +586,11 @@ class ReservationEventMapper
 	private function BuildReminderRemovedEvent(ReminderRemovedEvent $event, ExistingReservationSeries $series)
 	{
 		return new EventCommand(new RemoveReservationReminderCommand($series->SeriesId(), $event->ReminderType()), $series);
+	}
+
+	private function BuildRemovedFromWaitingListEvent(RemovedFromWaitingListEvent $event, ExistingReservationSeries $series)
+	{
+		return new EventCommand(new RemoveFromWaitingListCommand($series->SeriesId(), $event->UserId()), $series);
 	}
 }
 

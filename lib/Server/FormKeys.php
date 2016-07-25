@@ -83,6 +83,8 @@ class FormKeys
 	const GROUP_NAME = 'group_name';
 	const GROUP_ADMIN = 'group_admin';
 
+	const HAS_WAITING_LIST = 'has_waiting_list';
+
 	const INSTALL_PASSWORD = 'install_password';
 	const INSTALL_DB_USER = 'install_db_user';
 	const INSTALL_DB_PASSWORD = 'install_db_password';
@@ -192,6 +194,8 @@ class FormKeys
 	const USERNAME = 'username';
 	const USER_IMPORT_FILE = 'USER_IMPORT_FILE';
 	const USING_SINGLE_LAYOUT = 'USING_SINGLE_LAYOUT';
+
+	const IS_ON_WAITINGLIST = 'isOnWaitingList';
 
 	public static function Evaluate($formKey)
 	{

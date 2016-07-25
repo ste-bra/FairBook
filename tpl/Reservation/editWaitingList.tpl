@@ -16,27 +16,34 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Booked Scheduler.  If not, see <http://www.gnu.org/licenses/>.
 *}
-{extends file="Reservation/create.tpl"}
+{extends file="Reservation/edit.tpl"}
 
-{block name=header}
-	{include file='globalheader.tpl' TitleKey='EditReservationHeading' TitleArgs=$ReferenceNumber cssFiles='css/reservation.css,css/jquery.qtip.min.css,scripts/css/jqtree.css'}
-{/block}
-
-{block name=reservationHeader}
-	{translate key="EditReservationHeading" args=$ReferenceNumber}
+{block name="waitingList"}
+	<div class="waitingList">
+		{if $IAmOnWaitingList}
+			<span class="onWaitingListInfo">{translate key=IsOnWaitingList}</span>
+			<input type="hidden" {formname key=IS_ON_WAITINGLIST} value="1"/><br/>
+		{else}
+			<span class="notOnWaitingListInfo">{translate key=IsNotOnWaitingList}</span>
+			<input type="hidden" {formname key=IS_ON_WAITINGLIST} value="0"/><br/>
+		{/if}
+		<span>{translate key=NumberOfPeopleOnWaitingList args=$WaitingList|count}</span><br/>
+	</div>
 {/block}
 
 {block name=deleteButtons}
-	{if $IsRecurring}
-		<a href="#" class="delete prompt">
-			{html_image src="cross-button.png"}
-			{translate key='Delete'}
-		</a>
-	{else}
-		<a href="#" class="delete save">
-			{html_image src="cross-button.png"}
-			{translate key='Delete'}
-		</a>
+	{if $IAmOnWaitingList}
+		{if $IsRecurring}
+			<a href="#" class="delete prompt">
+				{html_image src="cross-button.png"}
+				{translate key='Delete'}
+			</a>
+		{else}
+			<a href="#" class="delete save">
+				{html_image src="cross-button.png"}
+				{translate key='Delete'}
+			</a>
+		{/if}
 	{/if}
 
 	<a style='margin-left:10px;' href="{$Path}export/{Pages::CALENDAR_EXPORT}?{QueryStringKeys::REFERENCE_NUMBER}={$ReferenceNumber}">
@@ -81,22 +88,4 @@ along with Booked Scheduler.  If not, see <http://www.gnu.org/licenses/>.
 		<img src="img/printer.png" />
 		{translate key='Print'}
 	</button>
-{/block}
-
-{block name="ajaxMessage"}
-	{translate key=UpdatingReservation}...<br/>
-{/block}
-
-{block name='attachments'}
-<div style="clear:both">&nbsp;</div>
-
-	<div id="attachmentDiv" class="res-attachments">
-	<span class="heading">{translate key=Attachments} ({$Attachments|count})</span>
-	{if $Attachments|count > 0}
-		<a href="#" class="remove" id="btnRemoveAttachment">({translate key="Remove"})</a><br/>
-		{foreach from=$Attachments item=attachment}
-			<a href="attachments/{Pages::RESERVATION_FILE}?{QueryStringKeys::ATTACHMENT_FILE_ID}={$attachment->FileId()}&{QueryStringKeys::REFERENCE_NUMBER}={$ReferenceNumber}" target="_blank">{$attachment->FileName()}</a>&nbsp;<input style='display: none;' type="checkbox" name="{FormKeys::REMOVED_FILE_IDS}[{$attachment->FileId()}]" />&nbsp;
-		{/foreach}
-	{/if}
-	</div>
 {/block}

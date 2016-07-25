@@ -99,6 +99,7 @@ class PreReservationFactory implements IPreReservationFactory
 	private function CreateAddService(ReservationValidationRuleProcessor $ruleProcessor, UserSession $userSession)
 	{
 		$ruleProcessor->AddRule(new AdminExcludedRule(new RequiresApprovalRule(PluginManager::Instance()->LoadAuthorization()), $userSession, $this->userRepository));
+		$ruleProcessor->AddRule(new AdminExcludedRule(new WaitingListAddRule(), $userSession, $this->userRepository));
 		return new AddReservationValidationService($ruleProcessor);
 	}
 
@@ -107,14 +108,14 @@ class PreReservationFactory implements IPreReservationFactory
 		if (Configuration::Instance()->GetSectionKey(ConfigSection::RESERVATION, ConfigKeys::RESERVATION_UPDATES_REQUIRE_APPROVAL, new BooleanConverter()))
 		{
 			$ruleProcessor->AddRule(new AdminExcludedRule(new RequiresApprovalRule(PluginManager::Instance()->LoadAuthorization()), $userSession, $this->userRepository));
-			$ruleProcessor->AddRule(new AdminExcludedRule(new CurrentUserIsReservationUserRule($userSession), $userSession, $this->userRepository));
+			$ruleProcessor->AddRule(new AdminExcludedRule(new CurrentUserOnWaitingListExcludedRule(new CurrentUserIsReservationUserRule($userSession), $userSession), $userSession, $this->userRepository));
 		}
 		return new UpdateReservationValidationService($ruleProcessor);
 	}
 
 	private function CreateDeleteService(ReservationValidationRuleProcessor $ruleProcessor, UserSession $userSession)
 	{
-		$ruleProcessor->AddRule(new AdminExcludedRule(new CurrentUserIsReservationUserRule($userSession), $userSession, $this->userRepository));
+		$ruleProcessor->AddRule(new AdminExcludedRule(new CurrentUserOnWaitingListExcludedRule(new CurrentUserIsReservationUserRule($userSession), $userSession), $userSession, $this->userRepository));
 		return new DeleteReservationValidationService($ruleProcessor);
 	}
 

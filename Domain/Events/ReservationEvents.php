@@ -638,4 +638,32 @@ class ReminderRemovedEvent extends SeriesEvent
 	}
 }
 
+class RemovedFromWaitingListEvent extends SeriesEvent
+{
+	private $userId;
+
+	/**
+	 * @return int
+	 */
+	public function UserId()
+	{
+		return $this->userId;
+	}
+
+	/**
+	 * @param ExistingReservationSeries $series
+	 * @param int $userId
+	 */
+	public function __construct(ExistingReservationSeries $series, $userId)
+	{
+		$this->series = $series;
+		$this->userId = $userId;
+	}
+
+	public function __toString()
+	{
+		return sprintf("%s%s%s", get_class($this), $this->UserId, $this->series->SeriesId());
+	}
+}
+
 ?>

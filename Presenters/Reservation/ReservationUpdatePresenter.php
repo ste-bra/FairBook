@@ -131,7 +131,7 @@ class ReservationUpdatePresenter implements IReservationUpdatePresenter
 					Log::Debug('Attaching file %s to series %s', $attachment->OriginalName(), $existingSeries->SeriesId());
 					$att = ReservationAttachment::Create($attachment->OriginalName(), $attachment->MimeType(),
 														 $attachment->Size(), $attachment->Contents(),
-														 $attachment->Extension(), $existingSeries->SeriesId());
+														 $attachment->Extension(), $existingSeries->SeriesId(), $this->userSession->UserId);
 					$existingSeries->AddAttachment($att);
 				}
 			}
@@ -160,6 +160,22 @@ class ReservationUpdatePresenter implements IReservationUpdatePresenter
 			$existingSeries->RemoveEndReminder();
 		}
 
+		if ($this->page->HasWaitingList())
+		{
+			$entry = New ReservationWaitingListEntry($this->userSession->UserId, $existingSeries->Title(), $existingSeries->Description());
+			$existingSeries->SetTitle('');
+			$existingSeries->SetDescription('');
+
+			if ($this->page->IsOnWaitingList())
+			{
+				$existingSeries->SetEditedWaitingListEntry($entry);
+			}
+			else
+			{
+				$existingSeries->SetAddedToWaitingList($entry);
+			}
+		}
+		
 		return $existingSeries;
 	}
 

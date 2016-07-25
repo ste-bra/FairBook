@@ -86,6 +86,7 @@ class ParameterNames
 	const LAYOUT_ID = '@layoutid';
 
 	const NAME = '@name';
+	const NEW_SERIES_ID = '@newseriesid';
 
 	const ORGANIZATION = '@organization';
 

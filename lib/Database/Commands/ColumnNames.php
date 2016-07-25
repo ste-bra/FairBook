@@ -129,6 +129,7 @@ class ColumnNames
 	const RESOURCE_COST = 'unit_cost';
 	const RESOURCE_AUTOASSIGN = 'autoassign';
 	const RESOURCE_REQUIRES_APPROVAL = 'requires_approval';
+	const RESOURCE_HAS_WAITING_LIST = 'has_waiting_list';
 	const RESOURCE_ALLOW_MULTIDAY = 'allow_multiday_reservations';
 	const RESOURCE_MAX_PARTICIPANTS = 'max_participants';
 	const RESOURCE_MINNOTICE = 'min_notice_time';

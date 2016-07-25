@@ -123,7 +123,7 @@ class ReservationSavePresenter implements IReservationSavePresenter
 				}
 				else
 				{
-					$att = ReservationAttachment::Create($attachment->OriginalName(), $attachment->MimeType(), $attachment->Size(), $attachment->Contents(), $attachment->Extension(), 0);
+					$att = ReservationAttachment::Create($attachment->OriginalName(), $attachment->MimeType(), $attachment->Size(), $attachment->Contents(), $attachment->Extension(), 0, $reservationSeries->UserId());
 					$reservationSeries->AddAttachment($att);
 				}
 			}

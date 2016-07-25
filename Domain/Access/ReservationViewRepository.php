@@ -156,6 +156,7 @@ class ReservationViewRepository implements IReservationViewRepository
 			$this->SetAttributes($reservationView);
 			$this->SetAttachments($reservationView);
 			$this->SetReminders($reservationView);
+			$this->SetWaitingListEntries($reservationView);
 		}
 
 		return $reservationView;
@@ -331,7 +332,8 @@ class ReservationViewRepository implements IReservationViewRepository
 		{
 			$reservationView->AddAttachment(new ReservationAttachmentView($row[ColumnNames::FILE_ID],
 																		  $row[ColumnNames::SERIES_ID],
-																		  $row[ColumnNames::FILE_NAME]));
+																		  $row[ColumnNames::FILE_NAME],
+																		  $row[ColumnNames::USER_ID]));
 		}
 	}
 
@@ -350,6 +352,24 @@ class ReservationViewRepository implements IReservationViewRepository
 				$reservationView->EndReminder = new ReservationReminderView($row[ColumnNames::REMINDER_MINUTES_PRIOR]);
 			}
 		}
+	}
+
+	/**
+	 * @param ReservationView $reservationView
+	 */
+	private function SetWaitingListEntries(ReservationView $reservationView)
+	{
+		$getWaitingListCommand = new GetWaitingListCommand($reservationView->SeriesId);
+		$result = ServiceLocator::GetDatabase()->Query($getWaitingListCommand);
+
+		$list = array();
+		while ($row = $result->GetRow())
+		{
+			$list[] = new ReservationWaitingListEntry($row[ColumnNames::USER_ID],
+												$row[ColumnNames::RESERVATION_TITLE],
+												$row[ColumnNames::RESERVATION_DESCRIPTION]);
+		}
+		$reservationView->SetWaitingList($list);
 	}
 
 	public function GetAccessoriesWithin(DateRange $dateRange)
@@ -695,6 +715,11 @@ class ReservationView
 	public $AllowParticipation = false;
 
 	/**
+	 * @var array|ReservationWaitingListEntry[]
+	 */
+	protected $waitingList = array();
+
+	/**
 	 * @param AttributeValue $attribute
 	 */
 	public function AddAttribute(AttributeValue $attribute)
@@ -746,6 +771,22 @@ class ReservationView
 	public function AddAttachment(ReservationAttachmentView $attachment)
 	{
 		$this->Attachments[] = $attachment;
+	}
+
+	/**
+	 * @return array|ReservationWaitingListEntry[]
+	 */
+	public function WaitingList()
+	{
+		return $this->waitingList;
+	}
+
+	/**
+	 * @param array|ReservationWaitingListEntry[] $list
+	 */
+	public function SetWaitingList($list)
+	{
+		$this->waitingList = $list;
 	}
 }
 
@@ -1725,15 +1766,21 @@ class AccessoryReservation
 class ReservationAttachmentView
 {
 	/**
+	 * @var int
+	 */
+	private $userId;
+
+	/**
 	 * @param int $fileId
 	 * @param int $seriesId
 	 * @param string $fileName
 	 */
-	public function __construct($fileId, $seriesId, $fileName)
+	public function __construct($fileId, $seriesId, $fileName, $userId = -1)
 	{
 		$this->fileId = $fileId;
 		$this->seriesId = $seriesId;
 		$this->fileName = $fileName;
+		$this->userId = $userId;
 	}
 
 	/**
@@ -1758,6 +1805,14 @@ class ReservationAttachmentView
 	public function SeriesId()
 	{
 		return $this->seriesId;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function UserId()
+	{
+		return $this->userId;
 	}
 }
 

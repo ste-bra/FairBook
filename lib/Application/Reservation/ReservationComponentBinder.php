@@ -66,8 +66,8 @@ class ReservationDateBinder implements IReservationComponentBinder
 		$initializer->SetDates($startDate, $endDate, $startPeriods, $endPeriods);
 
 		$hideRecurrence = !$initializer->CurrentUser()->IsAdmin && Configuration::Instance()->GetSectionKey(ConfigSection::RESERVATION,
-																											ConfigKeys::RESERVATION_PREVENT_RECURRENCE,
-																											new BooleanConverter());
+			ConfigKeys::RESERVATION_PREVENT_RECURRENCE,
+			new BooleanConverter());
 		$initializer->HideRecurrence($hideRecurrence);
 	}
 }
@@ -106,8 +106,8 @@ class ReservationUserBinder implements IReservationComponentBinder
 		$initializer->SetReservationUser($reservationUser);
 
 		$hideUser = Configuration::Instance()->GetSectionKey(ConfigSection::PRIVACY,
-															 ConfigKeys::PRIVACY_HIDE_USER_DETAILS,
-															 new BooleanConverter());
+			ConfigKeys::PRIVACY_HIDE_USER_DETAILS,
+			new BooleanConverter());
 
 		$initializer->ShowUserDetails(!$hideUser || $currentUser->IsAdmin);
 		$initializer->SetShowParticipation(!$hideUser || $currentUser->IsAdmin || $currentUser->IsGroupAdmin);
@@ -151,7 +151,7 @@ class ReservationResourceBinder implements IReservationComponentBinder
 		$initializer->BindAvailableResources($resources);
 		$accessories = $this->resourceService->GetAccessories();
 		$initializer->BindAvailableAccessories($accessories);
-		$initializer->ShowAdditionalResources($bindableResourceData->NumberAccessible > 0);
+		$initializer->ShowAdditionalResources($bindableResourceData->NumberAccessible > 0 && !$resources[$requestedResourceId]->GetRequiresApproval());
 		$initializer->SetReservationResource($bindableResourceData->ReservationResource);
 	}
 
@@ -253,7 +253,7 @@ class ReservationDetailsBinder implements IReservationComponentBinder
 	private $privacyFilter;
 
 	public function __construct(IReservationAuthorization $reservationAuthorization, IExistingReservationPage $page,
-								ReservationView $reservationView, IPrivacyFilter $privacyFilter)
+		ReservationView $reservationView, IPrivacyFilter $privacyFilter)
 	{
 		$this->reservationAuthorization = $reservationAuthorization;
 		$this->page = $page;
@@ -263,9 +263,11 @@ class ReservationDetailsBinder implements IReservationComponentBinder
 
 	public function Bind(IReservationComponentInitializer $initializer)
 	{
+		$currentUser = $initializer->CurrentUser();
+
 		$this->page->SetAdditionalResources($this->reservationView->AdditionalResourceIds);
-		$this->page->SetTitle($this->reservationView->Title);
-		$this->page->SetDescription($this->reservationView->Description);
+		$this->page->SetTitle($this->DetermineTitle($currentUser->UserId));
+		$this->page->SetDescription($this->DetermineDescription($currentUser->UserId));
 		$this->page->SetReferenceNumber($this->reservationView->ReferenceNumber);
 		$this->page->SetReservationId($this->reservationView->ReservationId);
 
@@ -290,8 +292,6 @@ class ReservationDetailsBinder implements IReservationComponentBinder
 
 		$this->page->SetAccessories($this->reservationView->Accessories);
 
-		$currentUser = $initializer->CurrentUser();
-
 		$this->page->SetCurrentUserParticipating($this->IsCurrentUserParticipating($currentUser->UserId));
 		$this->page->SetCurrentUserInvited($this->IsCurrentUserInvited($currentUser->UserId));
 
@@ -299,7 +299,7 @@ class ReservationDetailsBinder implements IReservationComponentBinder
 		$this->page->SetIsEditable($canBeEdited);
 		$this->page->SetIsApprovable($this->reservationAuthorization->CanApprove($this->reservationView, $currentUser));
 
-		$this->page->SetAttachments($this->reservationView->Attachments);
+		$this->page->SetAttachments($this->CheckAttachments($currentUser->UserId));
 
 		$showUser = $this->privacyFilter->CanViewUser($initializer->CurrentUser(), $this->reservationView);
 		$showDetails = $this->privacyFilter->CanViewDetails($initializer->CurrentUser(), $this->reservationView);
@@ -311,13 +311,15 @@ class ReservationDetailsBinder implements IReservationComponentBinder
 		if (!empty($this->reservationView->StartReminder))
 		{
 			$this->page->SetStartReminder($this->reservationView->StartReminder->GetValue(),
-										  $this->reservationView->StartReminder->GetInterval());
+				$this->reservationView->StartReminder->GetInterval());
 		}
 		if (!empty($this->reservationView->EndReminder))
 		{
 			$this->page->SetEndReminder($this->reservationView->EndReminder->GetValue(),
-										$this->reservationView->EndReminder->GetInterval());
+				$this->reservationView->EndReminder->GetInterval());
 		}
+		$this->page->SetWaitingList($this->reservationView->WaitingList());
+		$this->page->SetCurrentUserOnWaitingList($this->IsCurrentUserOnWaitingList($currentUser->UserId));
 	}
 
 	private function IsCurrentUserParticipating($currentUserId)
@@ -339,6 +341,84 @@ class ReservationDetailsBinder implements IReservationComponentBinder
 		foreach ($this->reservationView->Invitees as $user)
 		{
 			if ($user->UserId == $currentUserId)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * @param int $currentUserId
+	 * @return array|ReservationAttachmentView[]
+	 */
+	private function CheckAttachments($currentUserId)
+	{
+		if (count($this->reservationView->WaitingList()) > 0)
+		{
+			$attachments = array();
+			foreach ($this->reservationView->Attachments as $attachment)
+			{
+				if ($attachment->UserId() == $currentUserId)
+				{
+					$attachments[] = $attachment;
+				}
+			}
+			return $attachments;			
+		}
+		else
+		{
+			return $this->reservationView->Attachments;
+		}
+	}
+
+	/**
+	 * @param int $currentUserId
+	 * @return string
+	 */
+	private function DetermineTitle($currentUserId)
+	{
+		if (count($this->reservationView->WaitingList()))
+		{
+			foreach ($this->reservationView->WaitingList() as $entry)
+			{
+				if ($entry->UserId() == $currentUserId)
+				{
+					return $entry->Title();
+				}
+			}
+		}
+		return $this->reservationView->Title;
+	}
+
+	/**
+	 * @param int $currentUserId
+	 * @return string
+	 */
+	private function DetermineDescription($currentUserId)
+	{
+		if (count($this->reservationView->WaitingList()))
+		{
+			foreach ($this->reservationView->WaitingList() as $entry)
+			{
+				if ($entry->UserId() == $currentUserId)
+				{
+					return $entry->Description();
+				}
+			}
+		}
+		return $this->reservationView->Description;
+	}
+
+	/**
+	 * @param int $currentUserId
+	 * @return bool
+	 */
+	private function IsCurrentUserOnWaitingList($currentUserId)
+	{
+		foreach ($this->reservationView->WaitingList() as $entry)
+		{
+			if ($entry->UserId() == $currentUserId)
 			{
 				return true;
 			}

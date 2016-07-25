@@ -90,8 +90,8 @@ class Queries
 		VALUES (@seriesid, @accessoryid, @quantity)';
 
 	const ADD_RESERVATION_ATTACHMENT =
-			'INSERT INTO reservation_files (series_id, file_name, file_type, file_size, file_extension)
-		VALUES (@seriesid, @file_name, @file_type, @file_size, @file_extension)';
+			'INSERT INTO reservation_files (series_id, user_id, file_name, file_type, file_size, file_extension)
+		VALUES (@seriesid, @userid, @file_name, @file_type, @file_size, @file_extension)';
 
 	const ADD_RESERVATION_REMINDER =
 			'INSERT INTO reservation_reminders (series_id, minutes_prior, reminder_type)
@@ -1009,6 +1009,31 @@ const GET_RESERVATION_LIST_TEMPLATE =
 			'SELECT user_id, password, salt, legacypassword
 		FROM users
 		WHERE (username = @username OR email = @username) AND status_id = 1';
+
+	const ADD_WAITING_LIST_ENTRY =
+			'INSERT INTO reservation_waiting_list (series_id, user_id, title, description) VALUES (@seriesid, @userid, @title, @description)';
+
+	const GET_WAITING_LIST = 'SELECT * FROM reservation_waiting_list WHERE series_id = @seriesid';
+
+	const EDIT_WAITING_LIST =
+			'UPDATE reservation_waiting_list
+		SET
+			title = @title,
+			description = @description
+		WHERE
+			series_id = @seriesid AND user_id = @userid';
+
+	const UPDATE_WAITING_LIST =
+			'UPDATE reservation_waiting_list
+		SET
+			series_id = @newseriesid
+		WHERE
+			series_id = @seriesid';
+
+	const REMOVE_WAITING_LIST_ENTRY =
+			'DELETE FROM reservation_waiting_list 
+		WHERE
+			series_id = @seriesid AND user_id = @userid';
 }
 
 class QueryBuilder
@@ -1064,4 +1089,5 @@ class QueryBuilder
 						   'AND ' . self::$DATE_FRAGMENT . ' AND a.accessory_name LIKE @accessoryname');
 	}
 }
+
 ?>

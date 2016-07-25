@@ -56,6 +56,11 @@ class ReservationAttachment
 	protected $seriesId;
 
 	/**
+	 * @var int
+	 */
+	protected $userId;
+
+	/**
 	 * @return int
 	 */
 	public function FileId()
@@ -111,6 +116,14 @@ class ReservationAttachment
 		return $this->seriesId;
 	}
 
+	/**
+	 * @return int
+	 */
+	public function UserId()
+	{
+		return $this->userId;
+	}
+
 	protected function __construct()
 	{
 
@@ -124,9 +137,10 @@ class ReservationAttachment
 	 * @param mixed $fileContent
 	 * @param string $fileExtension
 	 * @param int $seriesId
+	 * @param int $userId
 	 * @return ReservationAttachment
 	 */
-	public static function Create($fileName, $fileType, $fileSize, $fileContent, $fileExtension, $seriesId)
+	public static function Create($fileName, $fileType, $fileSize, $fileContent, $fileExtension, $seriesId, $userId)
 	{
 		$file = new ReservationAttachment();
 		$file->fileName = $fileName;
@@ -135,6 +149,7 @@ class ReservationAttachment
 		$file->fileContent = $fileContent;
 		$file->fileExtension = $fileExtension;
 		$file->seriesId = $seriesId;
+		$file->userId = $userId;
 
 		return $file;
 	}

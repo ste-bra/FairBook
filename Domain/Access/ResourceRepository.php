@@ -275,7 +275,7 @@ class ResourceRepository implements IResourceRepository
 		foreach ($this->GetScheduleResources($scheduleId) as $r)
 		{
 			$resourceList[$r->GetId()] = $r;
-			$_assignments[] = new ResourceGroupAssignment(0, $r->GetName(), $r->GetId(), $r->GetAdminGroupId(), $r->GetScheduleId(), $r->GetStatusId(), $r->GetScheduleAdminGroupId());
+			$_assignments[] = new ResourceGroupAssignment(0, $r->GetName(), $r->GetId(), $r->GetAdminGroupId(), $r->GetScheduleId(), $r->GetStatusId(), $r->GetScheduleAdminGroupId(), $r->GetRequiresApproval());
 		}
 
 		while ($row = $groups->GetRow())
@@ -292,12 +292,13 @@ class ResourceRepository implements IResourceRepository
 			{
 				$r = $resourceList[$resourceId];
 				$_assignments[] = new ResourceGroupAssignment($row[ColumnNames::RESOURCE_GROUP_ID],
-																		  $row[ColumnNames::RESOURCE_NAME],
-																		  $row[ColumnNames::RESOURCE_ID],
-																		  $r->GetAdminGroupId(),
-																		  $r->GetScheduleId(),
-																		  $r->GetStatusId(),
-																		  $r->GetScheduleAdminGroupId());
+															  $row[ColumnNames::RESOURCE_NAME],
+															  $row[ColumnNames::RESOURCE_ID],
+															  $r->GetAdminGroupId(),
+															  $r->GetScheduleId(),
+															  $r->GetStatusId(),
+															  $r->GetScheduleAdminGroupId(),
+															  $row[ColumnNames::RESOURCE_REQUIRES_APPROVAL]);
 			}
 		}
 
@@ -576,13 +577,14 @@ class ResourceDto
 	 * @param null|int $scheduleId
 	 * @param null|TimeInterval $minLength
 	 */
-	public function __construct($id, $name, $canAccess = true, $scheduleId = null, $minLength = null)
+	public function __construct($id, $name, $canAccess = true, $scheduleId = null, $minLength = null, $requiresApproval = false)
 	{
 		$this->Id = $id;
 		$this->Name = $name;
 		$this->CanAccess = $canAccess;
 		$this->ScheduleId = $scheduleId;
 		$this->MinimumLength = $minLength;
+		$this->requiresApproval = $requiresApproval;
 	}
 
 	/**
@@ -609,6 +611,11 @@ class ResourceDto
 	 * @var null|TimeInterval
 	 */
 	public $MinimumLength;
+
+	/**
+	 * @var bool
+	 */
+	private $requiresApproval;
 
 	/**
 	 * alias of GetId()
@@ -649,5 +656,13 @@ class ResourceDto
 	public function GetMinimumLength()
 	{
 		return $this->MinimumLength;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function GetRequiresApproval()
+	{
+		return $this->requiresApproval;
 	}
 }

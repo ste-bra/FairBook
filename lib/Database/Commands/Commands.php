@@ -234,7 +234,7 @@ class AddReservationAccessoryCommand extends SqlCommand
 
 class AddReservationAttachmentCommand extends SqlCommand
 {
-	public function __construct($fileName, $fileType, $fileSize, $fileExtension, $seriesId)
+	public function __construct($fileName, $fileType, $fileSize, $fileExtension, $seriesId, $userId)
 	{
 		parent::__construct(Queries::ADD_RESERVATION_ATTACHMENT);
 
@@ -243,6 +243,7 @@ class AddReservationAttachmentCommand extends SqlCommand
 		$this->AddParameter(new Parameter(ParameterNames::FILE_SIZE, $fileSize));
 		$this->AddParameter(new Parameter(ParameterNames::FILE_EXTENSION, $fileExtension));
 		$this->AddParameter(new Parameter(ParameterNames::SERIES_ID, $seriesId));
+		$this->AddParameter(new Parameter(ParameterNames::USER_ID, $userId));
 	}
 }
 
@@ -2105,5 +2106,58 @@ class UpdateUserSessionCommand extends SqlCommand
 		$this->AddParameter(new Parameter(ParameterNames::SESSION_TOKEN, $token));
 		$this->AddParameter(new Parameter(ParameterNames::DATE_MODIFIED, $insertTime->ToDatabase()));
 		$this->AddParameter(new Parameter(ParameterNames::USER_SESSION, $serializedSession));
+	}
+}
+
+class AddToWaitingListCommand extends SqlCommand
+{
+	public function __construct($seriesId, $userId, $title, $description)
+	{
+		parent::__construct(Queries::ADD_WAITING_LIST_ENTRY);
+		$this->AddParameter(new Parameter(ParameterNames::SERIES_ID, $seriesId));
+		$this->AddParameter(new Parameter(ParameterNames::USER_ID, $userId));
+		$this->AddParameter(new Parameter(ParameterNames::TITLE, $title));
+		$this->AddParameter(new Parameter(ParameterNames::DESCRIPTION, $description));
+	}
+}
+
+class RemoveFromWaitingListCommand extends SqlCommand
+{
+	public function __construct($seriesId, $userId)
+	{
+		parent::__construct(Queries::REMOVE_WAITING_LIST_ENTRY);
+		$this->AddParameter(new Parameter(ParameterNames::SERIES_ID, $seriesId));
+		$this->AddParameter(new Parameter(ParameterNames::USER_ID, $userId));		
+	}
+}
+
+class GetWaitingListCommand extends SqlCommand
+{
+	public function __construct($seriesId)
+	{
+		parent::__construct(Queries::GET_WAITING_LIST);
+		$this->AddParameter(new Parameter(ParameterNames::SERIES_ID, $seriesId));
+	}
+}
+
+class EditWaitingListCommand extends SqlCommand
+{
+	public function __construct($seriesId, $userId, $title, $description)
+	{
+		parent::__construct(Queries::EDIT_WAITING_LIST);
+		$this->AddParameter(new Parameter(ParameterNames::SERIES_ID, $seriesId));
+		$this->AddParameter(new Parameter(ParameterNames::USER_ID, $userId));
+		$this->AddParameter(new Parameter(ParameterNames::TITLE, $title));
+		$this->AddParameter(new Parameter(ParameterNames::DESCRIPTION, $description));
+	}
+}
+
+class UpdateWaitingListCommand extends SqlCommand
+{
+	public function __construct($currentSeriesId, $newSeriesId)
+	{
+		parent::__construct(Queries::UPDATE_WAITING_LIST);
+		$this->AddParameter(new Parameter(ParameterNames::SERIES_ID, $currentSeriesId));
+		$this->AddParameter(new Parameter(ParameterNames::NEW_SERIES_ID, $newSeriesId));
 	}
 }

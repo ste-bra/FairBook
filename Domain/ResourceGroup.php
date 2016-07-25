@@ -80,7 +80,7 @@ class ResourceGroupTree
 	{
 		if (array_key_exists($assignment->group_id, $this->references))
 		{
-			$this->resources[$assignment->resource_id] = new ResourceDto($assignment->resource_id, $assignment->resource_name);
+			$this->resources[$assignment->resource_id] = new ResourceDto($assignment->resource_id, $assignment->resource_name, true, null, null, $assignment->GetRequiresApproval());
 			$this->references[$assignment->group_id]->AddResource($assignment);
 		}
 	}
@@ -242,7 +242,12 @@ class ResourceGroupAssignment implements IResource
 	 */
 	private $scheduleAdminGroupId;
 
-	public function __construct($group_id, $resource_name, $resource_id, $resourceAdminGroupId, $scheduleId, $statusId, $scheduleAdminGroupId)
+	/**
+	 * @var bool
+	 */
+	private $requiresApproval = false;
+
+	public function __construct($group_id, $resource_name, $resource_id, $resourceAdminGroupId, $scheduleId, $statusId, $scheduleAdminGroupId, $requiresApproval = false)
 	{
 		$this->group_id = $group_id;
 		$this->resource_name = $resource_name;
@@ -253,6 +258,8 @@ class ResourceGroupAssignment implements IResource
 		$this->scheduleId = $scheduleId;
 		$this->statusId = $statusId;
 		$this->scheduleAdminGroupId = $scheduleAdminGroupId;
+		$this->requiresApproval = $requiresApproval;
+
 	}
 
 	public function GetId()
@@ -288,5 +295,13 @@ class ResourceGroupAssignment implements IResource
 	public function GetResourceId()
 	{
 		return $this->resource_id;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function GetRequiresApproval()
+	{
+		return $this->requiresApproval;
 	}
 }

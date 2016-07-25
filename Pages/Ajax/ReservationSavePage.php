@@ -489,6 +489,38 @@ class ReservationSavePage extends SecurePage implements IReservationSavePage
 		$val = $this->server->GetForm(FormKeys::ALLOW_PARTICIPATION);
 		return !empty($val);
 	}
+
+	/**
+	 * @return bool
+	 */
+	public function HasWaitingList()
+	{
+		$val = $this->server->GetForm(FormKeys::IS_ON_WAITINGLIST);
+		if (isset($val))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function IsOnWaitingList()
+	{
+		$val = $this->server->GetForm(FormKeys::IS_ON_WAITINGLIST);
+		if (isset($val))
+		{
+			return $val == 1;
+		}
+		else
+		{
+			return false;
+		}
+	}
 }
 
 class AccessoryFormElement

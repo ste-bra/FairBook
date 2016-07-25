@@ -697,6 +697,12 @@ class en_us extends Language
 		$strings['AnnouncementSubject'] = 'A new announcement was posted by %s';
 		// End Email Subjects
 
+		// WaitingList
+		$strings['NumberOfPeopleOnWaitingList'] = 'There are currently %s people on the waiting list';
+		$strings['IsOnWaitingList'] = 'You are on the waiting list';
+		$strings['IsNotOnWaitingList'] = 'You are not on the waiting list';
+		// End WaitingList
+
 		$this->Strings = $strings;
 
 		return $this->Strings;

@@ -62,6 +62,13 @@ class ReservationSeries
 	}
 
 	/**
+	 * @param int $userId
+	 */
+	public function SetUserId($userId)
+	{
+		$this->_userId = $userId;
+	}
+	/**
 	 * @var UserSession
 	 */
 	protected $_bookedBy;
@@ -117,6 +124,14 @@ class ReservationSeries
 	}
 
 	/**
+	 * @param string $title
+	 */
+	public function SetTitle($title)
+	{
+		$this->_title = $title;
+	}
+
+	/**
 	 * @var string
 	 */
 	protected $_description;
@@ -127,6 +142,14 @@ class ReservationSeries
 	public function Description()
 	{
 		return $this->_description;
+	}
+
+	/**
+	 * @param string $description
+	 */
+	public function SetDescription($description)
+	{
+		$this->_description = $description;
 	}
 
 	/**
@@ -244,6 +267,26 @@ class ReservationSeries
 	 * @var bool
 	 */
 	protected $allowParticipation = false;
+
+	/**
+	 * @var array|ReservationWaitingListEntry[]
+	 */
+	protected $waitingList = array();
+
+	/**
+	 * @var ReservationWaitingListEntry
+	 */
+	protected $addedToWaitingList;
+
+	/**
+	 * @var ReservationWaitingListEntry
+	 */
+	protected $editedWaitingListEntry;
+
+	/**
+	 * @var ReservationWaitingListEntry
+	 */
+	protected $removedFromWaitingList;
 
 	protected function __construct()
 	{
@@ -625,4 +668,89 @@ class ReservationSeries
 	{
 		$this->endReminder = $reminder;
 	}
+
+	/**
+	 * @return array|ReservationWaitingListEntry[]
+	 */
+	public function WaitingList()
+	{
+		return $this->waitingList;
+	}
+
+	/**
+	 * @param UserSession $userSession
+	 * @return bool
+	 */
+	public function IsUserOnWaitingList(UserSession $userSession)
+	{
+		foreach ($this->WaitingList() as $entry)
+		{
+			if ($entry->UserId() == $userSession->UserId)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * @param ReservationWaitingListEntry
+	 */
+	public function AddWaitingListEntry(ReservationWaitingListEntry $entry)
+	{
+		$this->waitingList[] = $entry;
+	}
+
+	/**
+	 * @return ReservationWaitingListEntry
+	 */
+	public function AddedToWaitingList()
+	{
+		return $this->addedToWaitingList;
+	}
+
+	/**
+	 * @param ReservationWaitingListEntry $entry
+	 * @return void
+	 */
+	public function SetAddedToWaitingList(ReservationWaitingListEntry $entry)
+	{
+		$this->addedToWaitingList = $entry;
+	}
+
+	/**
+	 * @return ReservationWaitingListEntry
+	 */
+	public function RemovedFromWaitingList()
+	{
+		return $this->removedFromWaitingList;
+	}
+
+	/**
+	 * @param ReservationWaitingListEntry $entry
+	 * @return void
+	 */
+	public function SetRemovedFromWaitingList(ReservationWaitingListEntry $entry)
+	{
+		$this->removedFromWaitingList = $entry;
+	}
+
+	/**
+	 * @return ReservationWaitingListEntry
+	 */
+	public function EditedWaitingListEntry()
+	{
+		return $this->editedWaitingListEntry;
+	}
+
+	/**
+	 * @param ReservationWaitingListEntry $entry
+	 * @return void
+	 */
+	public function SetEditedWaitingListEntry(ReservationWaitingListEntry $entry)
+	{
+		$this->editedWaitingListEntry = $entry;
+	}
 }
+
+?>

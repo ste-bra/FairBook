@@ -20,7 +20,10 @@ along with Booked Scheduler.  If not, see <http://www.gnu.org/licenses/>.
 <div id="reservationbox" class="readonly">
 	<div id="reservationFormDiv">
 		<div class="reservationHeader">
-			<h3>{translate key="ViewReservationHeading" args=$ReferenceNumber}</h3>
+			<h3>{block name=reservationHeader}
+					{translate key="ViewReservationHeading" args=$ReferenceNumber}
+				{/block}
+			</h3>
 		</div>
 		<div id="reservationDetails">
 			<ul class="no-style">

@@ -724,3 +724,40 @@ ALTER TABLE `resources` ADD FOREIGN KEY (`resource_status_reason_id`) REFERENCES
 UPDATE resources SET status_id = isactive;
 ALTER TABLE `resources` DROP COLUMN `isactive`;
 ALTER TABLE `resources` ADD COLUMN `buffer_time` int unsigned;
+
+--
+-- Table structure for table `reservation_waiting_list`
+--
+
+DROP TABLE IF EXISTS `reservation_waiting_list`;
+CREATE TABLE `reservation_waiting_list` (
+ `series_id` int unsigned NOT NULL,
+ `user_id` mediumint(8) unsigned NOT NULL,
+ `title` varchar(85) NOT NULL,
+ `description` text,
+ PRIMARY KEY (`series_id`, `user_id`),
+ INDEX (`series_id`),
+ FOREIGN KEY (`series_id`) 
+  REFERENCES reservation_series(`series_id`)
+  ON UPDATE CASCADE ON DELETE CASCADE,
+ INDEX (`user_id`),
+ FOREIGN KEY (`user_id`) 
+  REFERENCES users(`user_id`)
+  ON UPDATE CASCADE ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8;
+
+--
+-- Alter table structure 'reservation_files'
+--
+
+ALTER TABLE `reservation_files` ADD COLUMN `user_id` mediumint(8) unsigned NOT NULL;
+ALTER TABLE `reservation_files` ADD CONSTRAINT `user_id` 
+ FOREIGN KEY (`user_id`) 
+  REFERENCES users(`user_id`)
+  ON UPDATE CASCADE ON DELETE CASCADE;
+
+--
+-- Alter table structure 'resources'
+--
+
+ALTER TABLE `recources` ADD COLUMN `has_waiting_list` tinyint(1) unsigned NOT NULL default '0';
