@@ -701,6 +701,8 @@ class en_us extends Language
 		$strings['NumberOfPeopleOnWaitingList'] = 'There are currently %s people on the waiting list';
 		$strings['IsOnWaitingList'] = 'You are on the waiting list';
 		$strings['IsNotOnWaitingList'] = 'You are not on the waiting list';
+		$strings['ResourceHasWaitingList'] = 'Reservations use a waiting list';
+		$strings['ResourceHasWaitingListNone'] = 'Reservations do not use a waiting list';
 		// End WaitingList
 
 		$this->Strings = $strings;

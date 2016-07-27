@@ -80,7 +80,7 @@ class ResourceGroupTree
 	{
 		if (array_key_exists($assignment->group_id, $this->references))
 		{
-			$this->resources[$assignment->resource_id] = new ResourceDto($assignment->resource_id, $assignment->resource_name, true, null, null, $assignment->GetRequiresApproval());
+			$this->resources[$assignment->resource_id] = new ResourceDto($assignment->resource_id, $assignment->resource_name, true, null, null, $assignment->GetHasWaitingList());
 			$this->references[$assignment->group_id]->AddResource($assignment);
 		}
 	}
@@ -245,9 +245,9 @@ class ResourceGroupAssignment implements IResource
 	/**
 	 * @var bool
 	 */
-	private $requiresApproval = false;
+	private $hasWaitingList;
 
-	public function __construct($group_id, $resource_name, $resource_id, $resourceAdminGroupId, $scheduleId, $statusId, $scheduleAdminGroupId, $requiresApproval = false)
+	public function __construct($group_id, $resource_name, $resource_id, $resourceAdminGroupId, $scheduleId, $statusId, $scheduleAdminGroupId, $hasWaitingList = false)
 	{
 		$this->group_id = $group_id;
 		$this->resource_name = $resource_name;
@@ -258,7 +258,7 @@ class ResourceGroupAssignment implements IResource
 		$this->scheduleId = $scheduleId;
 		$this->statusId = $statusId;
 		$this->scheduleAdminGroupId = $scheduleAdminGroupId;
-		$this->requiresApproval = $requiresApproval;
+		$this->hasWaitingList = $hasWaitingList;
 
 	}
 
@@ -300,8 +300,8 @@ class ResourceGroupAssignment implements IResource
 	/**
 	 * @return bool
 	 */
-	public function GetRequiresApproval()
+	public function GetHasWaitingList()
 	{
-		return $this->requiresApproval;
+		return $this->hasWaitingList;
 	}
 }

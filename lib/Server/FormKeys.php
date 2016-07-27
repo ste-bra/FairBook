@@ -83,7 +83,7 @@ class FormKeys
 	const GROUP_NAME = 'group_name';
 	const GROUP_ADMIN = 'group_admin';
 
-	const HAS_WAITING_LIST = 'has_waiting_list';
+	const HAS_WAITING_LIST = 'hasWaitingList';
 
 	const INSTALL_PASSWORD = 'install_password';
 	const INSTALL_DB_USER = 'install_db_user';

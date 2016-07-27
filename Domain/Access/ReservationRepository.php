@@ -216,14 +216,14 @@ class ReservationRepository implements IReservationRepository
 	 */
 	private function PersistWaitingList(ReservationSeries $reservationSeries, Database $database)
 	{
-		$entry = $reservationSeries->AddedToWaitingList();
+		$entry = $reservationSeries->GetAddedToWaitingList();
 		if (isset($entry))
 		{
 			$addToWaitingListCommand = new AddToWaitingListCommand($reservationSeries->SeriesId(), $entry->UserId(), $entry->Title(), $entry->Description());
 			$database->Execute($addToWaitingListCommand);
 		}
 
-		$entry = $reservationSeries->EditedWaitingListEntry();
+		$entry = $reservationSeries->GetEditedWaitingListEntry();
 		if (isset($entry))
 		{
 			$editWaitingListCommand = new EditWaitingListCommand($reservationSeries->SeriesId(), $entry->UserId(), $entry->Title(), $entry->Description());

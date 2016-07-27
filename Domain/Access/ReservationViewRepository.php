@@ -776,7 +776,7 @@ class ReservationView
 	/**
 	 * @return array|ReservationWaitingListEntry[]
 	 */
-	public function WaitingList()
+	public function GetWaitingList()
 	{
 		return $this->waitingList;
 	}

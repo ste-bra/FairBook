@@ -79,6 +79,7 @@ class BookableResource implements IResource
 	protected $_clearAllPermissions;
 	protected $_autoAssignToggledOn = false;
 	protected $_requiresApproval;
+	protected $_hasWaitingList;
 	protected $_allowMultiday;
 	protected $_maxParticipants;
 	/**
@@ -203,6 +204,7 @@ class BookableResource implements IResource
 		$resource->WithScheduleAdminGroupId($row[ColumnNames::SCHEDULE_ADMIN_GROUP_ID_ALIAS]);
 		$resource->SetResourceTypeId($row[ColumnNames::RESOURCE_TYPE_ID]);
 		$resource->SetBufferTime($row[ColumnNames::RESOURCE_BUFFER_TIME]);
+		$resource->SetHasWaitingList($row[ColumnNames::RESOURCE_HAS_WAITING_LIST]);
 
 		return $resource;
 	}
@@ -401,6 +403,29 @@ class BookableResource implements IResource
 		else
 		{
 			$this->_requiresApproval = 0;
+		}
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function GetHasWaitingList()
+	{
+		return $this->_hasWaitingList;
+	}
+
+	/**
+	 * @param bool $value
+	 */
+	public function SetHasWaitingList($value)
+	{
+		if (!empty($value))
+		{
+			$this->_hasWaitingList = intval($value);
+		}
+		else
+		{
+			$this->_hasWaitingList = 0;
 		}
 	}
 

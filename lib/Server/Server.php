@@ -111,7 +111,7 @@ class Server
         {
 			$value = $_GET[$name];
 
-			if (!empty($value) && !is_array($value))
+			if ((!empty($value) || $value === "0") && !is_array($value))
 			{
             	return htmlspecialchars(trim($value));
 			}

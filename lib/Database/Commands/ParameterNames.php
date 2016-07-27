@@ -141,6 +141,7 @@ class ParameterNames
 	const RESOURCE_NAME = '@resource_name';
 	const RESOURCE_NOTES = '@resource_notes';
 	const RESOURCE_REQUIRES_APPROVAL = '@requires_approval';
+	const RESOURCE_HAS_WAITING_LIST = '@hasWaitingList';
 	const RESOURCE_LEVEL_ID = '@resourceLevelId';
 	const RESOURCE_IMAGE_NAME = '@imageName';
 	const RESOURCE_SORT_ORDER = '@sort_order';

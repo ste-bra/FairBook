@@ -1897,6 +1897,7 @@ class UpdateResourceCommand extends SqlCommand
 								TimeInterval $maxDuration,
 								$autoAssign,
 								$requiresApproval,
+								$hasWaitingList,
 								$allowMultiday,
 								$maxParticipants,
 								TimeInterval $minNoticeTime,
@@ -1925,6 +1926,7 @@ class UpdateResourceCommand extends SqlCommand
 		$this->AddParameter(new Parameter(ParameterNames::RESOURCE_MAXDURATION, $maxDuration->ToDatabase()));
 		$this->AddParameter(new Parameter(ParameterNames::RESOURCE_AUTOASSIGN, $autoAssign));
 		$this->AddParameter(new Parameter(ParameterNames::RESOURCE_REQUIRES_APPROVAL, $requiresApproval));
+		$this->AddParameter(new Parameter(ParameterNames::RESOURCE_HAS_WAITING_LIST, $hasWaitingList));
 		$this->AddParameter(new Parameter(ParameterNames::RESOURCE_ALLOW_MULTIDAY, $allowMultiday));
 		$this->AddParameter(new Parameter(ParameterNames::RESOURCE_MAX_PARTICIPANTS, $maxParticipants));
 		$this->AddParameter(new Parameter(ParameterNames::RESOURCE_MINNOTICE, $minNoticeTime->ToDatabase()));
