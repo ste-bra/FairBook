@@ -908,6 +908,7 @@ const GET_RESERVATION_LIST_TEMPLATE =
 			max_duration = @max_duration,
 			autoassign = @autoassign,
 			requires_approval = @requires_approval,
+			has_waiting_list = @hasWaitingList,
 			allow_multiday_reservations = @allow_multiday_reservations,
 			max_participants = @max_participants,
 			min_notice_time = @min_notice_time,

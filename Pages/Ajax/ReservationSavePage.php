@@ -493,7 +493,7 @@ class ReservationSavePage extends SecurePage implements IReservationSavePage
 	/**
 	 * @return bool
 	 */
-	public function HasWaitingList()
+	public function GetHasWaitingList()
 	{
 		$val = $this->server->GetForm(FormKeys::IS_ON_WAITINGLIST);
 		if (isset($val))

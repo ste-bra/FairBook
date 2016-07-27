@@ -182,6 +182,7 @@ class ResourceRepository implements IResourceRepository
 			$resource->GetMaxLength(),
 			$resource->GetAutoAssign(),
 			$resource->GetRequiresApproval(),
+			$resource->HasWaitingList(),
 			$resource->GetAllowMultiday(),
 			$resource->GetMaxParticipants(),
 			$resource->GetMinNotice(),
@@ -275,7 +276,7 @@ class ResourceRepository implements IResourceRepository
 		foreach ($this->GetScheduleResources($scheduleId) as $r)
 		{
 			$resourceList[$r->GetId()] = $r;
-			$_assignments[] = new ResourceGroupAssignment(0, $r->GetName(), $r->GetId(), $r->GetAdminGroupId(), $r->GetScheduleId(), $r->GetStatusId(), $r->GetScheduleAdminGroupId(), $r->GetRequiresApproval());
+			$_assignments[] = new ResourceGroupAssignment(0, $r->GetName(), $r->GetId(), $r->GetAdminGroupId(), $r->GetScheduleId(), $r->GetStatusId(), $r->GetScheduleAdminGroupId(), $r->HasWaitingList());
 		}
 
 		while ($row = $groups->GetRow())
@@ -298,7 +299,7 @@ class ResourceRepository implements IResourceRepository
 															  $r->GetScheduleId(),
 															  $r->GetStatusId(),
 															  $r->GetScheduleAdminGroupId(),
-															  $row[ColumnNames::RESOURCE_REQUIRES_APPROVAL]);
+															  $row[ColumnNames::RESOURCE_HAS_WAITING_LIST]);
 			}
 		}
 
@@ -577,14 +578,14 @@ class ResourceDto
 	 * @param null|int $scheduleId
 	 * @param null|TimeInterval $minLength
 	 */
-	public function __construct($id, $name, $canAccess = true, $scheduleId = null, $minLength = null, $requiresApproval = false)
+	public function __construct($id, $name, $canAccess = true, $scheduleId = null, $minLength = null, $hasWaitingList = false)
 	{
 		$this->Id = $id;
 		$this->Name = $name;
 		$this->CanAccess = $canAccess;
 		$this->ScheduleId = $scheduleId;
 		$this->MinimumLength = $minLength;
-		$this->requiresApproval = $requiresApproval;
+		$this->hasWaitingList = $hasWaitingList;
 	}
 
 	/**
@@ -615,7 +616,7 @@ class ResourceDto
 	/**
 	 * @var bool
 	 */
-	private $requiresApproval;
+	private $hasWaitingList;
 
 	/**
 	 * alias of GetId()
@@ -661,8 +662,8 @@ class ResourceDto
 	/**
 	 * @return bool
 	 */
-	public function GetRequiresApproval()
+	public function GetHasWaitingList()
 	{
-		return $this->requiresApproval;
+		return $this->hasWaitingList;
 	}
 }

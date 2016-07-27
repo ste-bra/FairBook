@@ -283,11 +283,6 @@ class ReservationSeries
 	 */
 	protected $editedWaitingListEntry;
 
-	/**
-	 * @var ReservationWaitingListEntry
-	 */
-	protected $removedFromWaitingList;
-
 	protected function __construct()
 	{
 		$this->_repeatOptions = new RepeatNone();
@@ -672,7 +667,7 @@ class ReservationSeries
 	/**
 	 * @return array|ReservationWaitingListEntry[]
 	 */
-	public function WaitingList()
+	public function GetWaitingList()
 	{
 		return $this->waitingList;
 	}
@@ -683,7 +678,7 @@ class ReservationSeries
 	 */
 	public function IsUserOnWaitingList(UserSession $userSession)
 	{
-		foreach ($this->WaitingList() as $entry)
+		foreach ($this->GetWaitingList() as $entry)
 		{
 			if ($entry->UserId() == $userSession->UserId)
 			{
@@ -704,7 +699,7 @@ class ReservationSeries
 	/**
 	 * @return ReservationWaitingListEntry
 	 */
-	public function AddedToWaitingList()
+	public function GetAddedToWaitingList()
 	{
 		return $this->addedToWaitingList;
 	}
@@ -721,24 +716,7 @@ class ReservationSeries
 	/**
 	 * @return ReservationWaitingListEntry
 	 */
-	public function RemovedFromWaitingList()
-	{
-		return $this->removedFromWaitingList;
-	}
-
-	/**
-	 * @param ReservationWaitingListEntry $entry
-	 * @return void
-	 */
-	public function SetRemovedFromWaitingList(ReservationWaitingListEntry $entry)
-	{
-		$this->removedFromWaitingList = $entry;
-	}
-
-	/**
-	 * @return ReservationWaitingListEntry
-	 */
-	public function EditedWaitingListEntry()
+	public function GetEditedWaitingListEntry()
 	{
 		return $this->editedWaitingListEntry;
 	}

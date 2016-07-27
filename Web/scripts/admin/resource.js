@@ -350,6 +350,13 @@ function ResourceManagement(opts) {
 
 		ConfigureAdminForm(elements.sortOrderForm, defaultSubmitCallback(elements.sortOrderForm));
 		ConfigureAdminForm(elements.statusForm, defaultSubmitCallback(elements.statusForm));
+
+		$('#hasWaitingList').change(function() {
+			if ($(this).val() == "1")
+			{
+				$('#requiresApproval').val("1");
+			}
+		});
 	};
 
 	ResourceManagement.prototype.add = function (resource) {
@@ -454,6 +461,7 @@ function ResourceManagement(opts) {
 
 		$('#allowMultiday').val(resource.allowMultiday);
 		$('#requiresApproval').val(resource.requiresApproval);
+		$('#hasWaitingList').val(resource.hasWaitingList);
 
 		var autoAssign = $('#autoAssign');
 		autoAssign.val(resource.autoAssign);

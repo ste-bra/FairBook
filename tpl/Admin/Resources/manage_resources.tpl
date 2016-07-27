@@ -72,6 +72,11 @@ along with Booked Scheduler.  If not, see <http://www.gnu.org/licenses/>.
 				</select>
 			</li>
 			<li>
+				<label for="filterHasWaitingList">{translate key='ResourceHasWaitingList'}</label>
+				<select id="filterHasWaitingList" class="textbox" {formname key=HAS_WAITING_LIST}>
+					{html_options options=$YesNoOptions selected=$HasWaitingListFilter}
+				</select>
+			</li>			<li>
 				<label for="filterAutoAssign">{translate key='ResourcePermissionAutoGranted'}</label>
 				<select id="filterAutoAssign" class="textbox" {formname key=AUTO_ASSIGN}>
 					{html_options options=$YesNoOptions selected=$AutoPermissionFilter}
@@ -258,6 +263,13 @@ along with Booked Scheduler.  If not, see <http://www.gnu.org/licenses/>.
 						{translate key='ResourceRequiresApproval'}
 					{else}
 						{translate key='ResourceRequiresApprovalNone'}
+					{/if}
+				</li>
+				<li>
+					{if $resource->GetHasWaitingList()}
+						{translate key='ResourceHasWaitingList'}
+					{else}
+						{translate key='ResourceHasWaitingListNone'}
 					{/if}
 				</li>
 				<li>
@@ -578,6 +590,13 @@ along with Booked Scheduler.  If not, see <http://www.gnu.org/licenses/>.
 					<li>
 						{translate key='ResourceRequiresApproval'}
 						<select id="requiresApproval" class="textbox" {formname key=REQUIRES_APPROVAL}>
+							<option value="1">{translate key='Yes'}</option>
+							<option value="0">{translate key='No'}</option>
+						</select>
+					</li>
+					<li>
+						{translate key='ResourceHasWaitingList'}
+						<select id="hasWaitingList" class="textbox" {formname key=HAS_WAITING_LIST}>
 							<option value="1">{translate key='Yes'}</option>
 							<option value="0">{translate key='No'}</option>
 						</select>
@@ -933,6 +952,11 @@ along with Booked Scheduler.  If not, see <http://www.gnu.org/licenses/>.
 			</select>
 		</li>
 		<li>
+			<label for="bulkEditHasWaitingList">{translate key='ResourceHasWaitingList'}</label>
+			<select id="bulkEditHasWaitingList" class="textbox" {formname key=HAS_WAITING_LIST}>
+				{html_options options=$YesNoUnchangedOptions}
+			</select>
+		</li><li>
 			<label for="bulkEditAutoAssign">{translate key='ResourcePermissionAutoGranted'}</label>
 			<select id="bulkEditAutoAssign" class="textbox" {formname key=AUTO_ASSIGN}>
 				{html_options options=$YesNoUnchangedOptions}
@@ -1040,6 +1064,7 @@ along with Booked Scheduler.  If not, see <http://www.gnu.org/licenses/>.
 			notes: "{$resource->GetNotes()|escape:'javascript'}",
 			autoAssign: '{$resource->GetAutoAssign()}',
 			requiresApproval: '{$resource->GetRequiresApproval()}',
+			hasWaitingList: '{$resource->GetHasWaitingList()}',
 			allowMultiday: '{$resource->GetAllowMultiday()}',
 			maxParticipants: '{$resource->GetMaxParticipants()}',
 			scheduleId: '{$resource->GetScheduleId()}',

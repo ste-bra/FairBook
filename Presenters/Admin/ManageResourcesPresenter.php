@@ -207,6 +207,7 @@ class ManageResourcesPresenter extends ActionPresenter
 		$maxDuration = $this->page->GetMaximumDuration();
 		$allowMultiDay = $this->page->GetAllowMultiday();
 		$requiresApproval = $this->page->GetRequiresApproval();
+		$hasWaitingList = $this->page->GetHasWaitingList();
 		$autoAssign = $this->page->GetAutoAssign();
 		$minNotice = $this->page->GetStartNoticeMinutes();
 		$maxNotice = $this->page->GetEndNoticeMinutes();
@@ -222,6 +223,7 @@ class ManageResourcesPresenter extends ActionPresenter
 		$resource->SetMaxLength($maxDuration);
 		$resource->SetAllowMultiday($allowMultiDay);
 		$resource->SetRequiresApproval($requiresApproval);
+		$resource->SetHasWaitingList($hasWaitingList);
 		$resource->SetAutoAssign($autoAssign);
 		$resource->SetClearAllPermissions($clearAllPermissions);
 		$resource->SetMinNotice($minNotice);
@@ -490,6 +492,7 @@ class ManageResourcesPresenter extends ActionPresenter
 		$maxNoticeNone = $this->page->GetEndNoticeNone();
 		$allowMultiDay = $this->page->GetAllowMultiday();
 		$requiresApproval = $this->page->GetRequiresApproval();
+		$hasWaitingList = $this->page->GetHasWaitingList();
 		$autoAssign = $this->page->GetAutoAssign();
 		$allowSubscription = $this->page->GetAllowSubscriptions();
 		$attributes = $this->page->GetAttributes();
@@ -583,6 +586,10 @@ class ManageResourcesPresenter extends ActionPresenter
 				if ($this->ChangingDropDown($requiresApproval))
 				{
 					$resource->SetRequiresApproval($requiresApproval);
+				}
+				if ($this->ChangingDropDown($hasWaitingList))
+				{
+					$resource->SetHasWaitingList($hasWaitingList);
 				}
 				if ($this->ChangingDropDown($autoAssign))
 				{

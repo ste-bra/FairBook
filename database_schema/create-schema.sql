@@ -760,4 +760,4 @@ ALTER TABLE `reservation_files` ADD CONSTRAINT `user_id`
 -- Alter table structure 'resources'
 --
 
-ALTER TABLE `recources` ADD COLUMN `has_waiting_list` tinyint(1) unsigned NOT NULL default '0';
+ALTER TABLE `resources` ADD COLUMN `has_waiting_list` tinyint(1) unsigned NOT NULL default '0';

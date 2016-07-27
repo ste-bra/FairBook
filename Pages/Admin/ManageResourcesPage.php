@@ -441,6 +441,14 @@ class ManageResourcesPage extends ActionPage implements IManageResourcesPage
 	/**
 	 * @return string
 	 */
+	public function GetHasWaitingList()
+	{
+		return $this->GetForm(FormKeys::HAS_WAITING_LIST);
+	}
+
+	/**
+	 * @return string
+	 */
 	public function GetAutoAssign()
 	{
 		return $this->GetForm(FormKeys::AUTO_ASSIGN);
@@ -599,6 +607,7 @@ class ManageResourcesPage extends ActionPage implements IManageResourcesPage
 		$this->Set('ResourceStatusReasonFilterId', $values->ResourceStatusReasonFilterId);
 		$this->Set('CapacityFilter', $values->CapacityFilter);
 		$this->Set('RequiresApprovalFilter', $values->RequiresApprovalFilter);
+		$this->Set('HasWaitingListFilter', $values->HasWaitingListFilter);
 		$this->Set('AutoPermissionFilter', $values->AutoPermissionFilter);
 		$this->Set('AllowMultiDayFilter', $values->AllowMultiDayFilter);
 	}
@@ -688,6 +697,7 @@ class ResourceFilterValues
 	public $ResourceStatusReasonFilterId;
 	public $CapacityFilter;
 	public $RequiresApprovalFilter;
+	public $HasWaitingListFilter;
 	public $AutoPermissionFilter;
 	public $AllowMultiDayFilter;
 	public $Attributes = array();
@@ -759,6 +769,12 @@ class ResourceFilterValues
 			$filter->_And(new SqlFilterEquals(new SqlFilterColumn(TableNames::RESOURCES_ALIAS,
 																  ColumnNames::RESOURCE_REQUIRES_APPROVAL),
 											  $this->RequiresApprovalFilter));
+		}
+		if ($this->HasWaitingListFilter != '')
+		{
+			$filter->_And(new SqlFilterEquals(new SqlFilterColumn(TableNames::RESOURCES_ALIAS,
+																  ColumnNames::RESOURCE_HAS_WAITING_LIST),
+											  $this->HasWaitingListFilter));
 		}
 		if ($this->AutoPermissionFilter != '')
 		{

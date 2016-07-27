@@ -34,7 +34,7 @@ class CurrentUserOnWaitingListExcludedRule implements IReservationValidationRule
 
 	public function Validate($reservationSeries)
 	{
-		if ($reservationSeries->AddedToWaitingList() !== null && $reservationSeries->AddedToWaitingList()->UserId() == $this->userSession->UserId)
+		if ($reservationSeries->GetAddedToWaitingList() !== null && $reservationSeries->GetAddedToWaitingList()->UserId() == $this->userSession->UserId)
 		{
 			return new ReservationRuleResult();
 		}

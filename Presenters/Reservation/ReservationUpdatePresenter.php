@@ -160,7 +160,7 @@ class ReservationUpdatePresenter implements IReservationUpdatePresenter
 			$existingSeries->RemoveEndReminder();
 		}
 
-		if ($this->page->HasWaitingList())
+		if ($this->page->GetHasWaitingList())
 		{
 			$entry = New ReservationWaitingListEntry($this->userSession->UserId, $existingSeries->Title(), $existingSeries->Description());
 			$existingSeries->SetTitle('');
