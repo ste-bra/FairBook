@@ -90,6 +90,7 @@ class FormKeys
 	const INSTALL_DB_PASSWORD = 'install_db_password';
 	const INVITATION_LIST = 'invitationList';
 	const IS_ACTIVE = 'isactive';
+	const IS_ON_WAITINGLIST = 'isOnWaitingList';
 	const INCLUDE_DELETED = 'INCLUDE_DELETED';
 	const ICS_IMPORT_FILE = 'ICS_IMPORT_FILE';
 
@@ -195,8 +196,8 @@ class FormKeys
 	const USER_IMPORT_FILE = 'USER_IMPORT_FILE';
 	const USING_SINGLE_LAYOUT = 'USING_SINGLE_LAYOUT';
 
-	const IS_ON_WAITINGLIST = 'isOnWaitingList';
-
+	const WAITINGLIST_PRIORITY = 'WaitingListPriority';
+	
 	public static function Evaluate($formKey)
 	{
 		$key = strtoupper($formKey);

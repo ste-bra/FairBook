@@ -118,7 +118,6 @@ class ExistingReservationPage extends ReservationPage implements IExistingReserv
 {
 	protected $IsEditable = false;
 	protected $IsApprovable = false;
-	protected $hasWaitingList = false;
 
 	public function __construct()
 	{
@@ -143,7 +142,7 @@ class ExistingReservationPage extends ReservationPage implements IExistingReserv
 
 	protected function GetTemplateName()
 	{
-		if ($this->hasWaitingList)
+		if ($this->hasWaitingList && $this->IsEditable)
 		{
 			return 'Reservation/editWaitingList.tpl';
 		}
@@ -274,20 +273,31 @@ class ExistingReservationPage extends ReservationPage implements IExistingReserv
 	public function SetWaitingList($waitingList)
 	{
 		$this->Set('WaitingList', $waitingList);
-		if (count($waitingList) > 0)
-		{
-			$this->hasWaitingList = true;
-		}
+	}
+
+	/**
+	 * @param bool $IsUserOnWaitingList
+	 */
+	public function SetIsUserOnWaitingList($IsUserOnWaitingList)
+	{
+		$this->Set('IAmOnWaitingList', $IsUserOnWaitingList);
 	}
 
 	/**
 	 * @param bool $amIOnWaitingList
 	 */
-	public function SetCurrentUserOnWaitingList($amIOnWaitingList)
+	public function SetWaitingListPriority($priority)
 	{
-		$this->Set('IAmOnWaitingList', $amIOnWaitingList);
+		$this->Set('WaitingListPriority', $priority);
 	}
 
+	/**
+	 * @param bool $canDelete
+	 */
+	public function SetCanDelete($canDelete)
+	{
+		$this->Set('CanDelete', $canDelete);
+	}
 }
 
 ?>

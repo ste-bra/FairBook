@@ -40,4 +40,5 @@ require_once(ROOT_DIR . 'Domain/User.php');
 require_once(ROOT_DIR . 'Domain/Group.php');
 require_once(ROOT_DIR . 'Domain/Quota.php');
 require_once(ROOT_DIR . 'Domain/ReservationAttachment.php');
+require_once(ROOT_DIR . 'Domain/ReservationWaitingListEntry.php');
 ?>

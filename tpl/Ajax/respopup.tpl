@@ -87,6 +87,11 @@ along with Booked Scheduler.  If not, see <http://www.gnu.org/licenses/>.
 	{/capture}
 	{$formatter->Add('description', $smarty.capture.description)}
 
+	{capture "waitingList"}
+		<div class="waitingList">{if $waitingList|count > 0}{translate key="NumberOfPeopleOnWaitingList" args=$waitingList|count}{/if}</div>
+	{/capture}
+	{$formatter->Add('waitingList', $smarty.capture.waitingList)}
+
 	{capture "attributes"}
 	{if !$hideDetails}
 		{if $attributes|count > 0}

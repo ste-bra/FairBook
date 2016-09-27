@@ -139,6 +139,17 @@ class ReservationSavePresenter implements IReservationSavePresenter
 			$reservationSeries->AddEndReminder(new ReservationReminder($this->_page->GetEndReminderValue(), $this->_page->GetEndReminderInterval()));
 		}
 
+		if ($resource->GetHasWaitingList() && !$this->userSession->IsAdmin && !$this->userSession->IsGroupAdmin)
+		{
+			$priority = $this->_page->GetWaitingListPriority();
+			$reservationSeries->SetAddedToWaitingList(new ReservationWaitingListEntry($userId, $reservationSeries->Title(), $reservationSeries->Description(), $priority));
+
+			$schedulerId = (new UserRepository)->GetScheduler()->Id();
+			$reservationSeries->SetUserId($schedulerId);
+			$reservationSeries->SetTitle('');
+			$reservationSeries->SetDescription('');
+		}
+
 		return $reservationSeries;
 	}
 
@@ -156,6 +167,7 @@ class ReservationSavePresenter implements IReservationSavePresenter
 		{
 			$this->_page->SetRequiresApproval($reservationSeries->RequiresApproval());
 			$this->_page->SetReferenceNumber($reservationSeries->CurrentInstance()->ReferenceNumber());
+			$this->_page->SetUserJoinedWaitingList($reservationSeries->GetAddedToWaitingList() !== null);
 		}
 	}
 

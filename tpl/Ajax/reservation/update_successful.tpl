@@ -22,8 +22,16 @@ along with Booked Scheduler.  If not, see <http://www.gnu.org/licenses/>.
 	{else}
 		{html_image src="dialog-success.png" id="imgReservationSuccess"}
 	{/if}
-	<div class="createdMessage">{translate key=ReservationUpdated}</div>
-    <div class="referenceNumber">{translate key=YourReferenceNumber args=$ReferenceNumber}</div>
+	
+	{if $UserJoinedWaitingList}
+		<div class="createdMessage">{translate key=ReservationCreated}</div>
+		<div class="waitingList">{translate key=JoinedWaitingList}</div>
+	{else}
+		<div class="createdMessage">{translate key=ReservationUpdated}</div>
+		{if $UserEditedWaitingList}
+			<div class="waitingList">{translate key=IsOnWaitingList}</div>
+		{/if}
+	{/if}
 
 	<div class="dates">
 		{foreach from=$Instances item=instance name=date_list}
@@ -38,9 +46,10 @@ along with Booked Scheduler.  If not, see <http://www.gnu.org/licenses/>.
 		{/foreach}
 	</div>
 
-	{if $RequiresApproval}
+	{if $RequiresApproval && !$UserJoinedWaitingList && !$UserEditedWaitingList}
 		<div class="approvalMessage">{translate key=ReservationRequiresApproval}</div>
 	{/if}
+    <div class="referenceNumber">{translate key=YourReferenceNumber args=$ReferenceNumber}</div>
 
 	<input type="button" id="btnSaveSuccessful" value="{translate key='Close'}" class="button" />
 

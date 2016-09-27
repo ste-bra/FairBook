@@ -52,7 +52,7 @@ $conf['settings']['default.homepage'] = '1'; 	      			// the default homepage t
 
 $conf['settings']['schedule']['use.per.user.colors'] = 'false'; 		// color reservations by user
 $conf['settings']['schedule']['show.inaccessible.resources'] = 'true';  // whether or not resources that are inaccessible to the user are visible
-$conf['settings']['schedule']['reservation.label'] = '{name}';    		// format for what to display on the reservation slot label. Available properties are: {name}, {title}, {description}, {email}, {phone}, {organization}, {position}, {startdate}, {enddate} {resourcename} {participants} {invitees} {reservationAttributes}. Custom attributes can be added using att with the attribute id. For example {att1}
+$conf['settings']['schedule']['reservation.label'] = '{name} {waitinglist}';    		// format for what to display on the reservation slot label. Available properties are: {name}, {title}, {description}, {email}, {phone}, {organization}, {position}, {startdate}, {enddate} {resourcename} {participants} {invitees} {reservationAttributes} {waitinglist}. Custom attributes can be added using att with the attribute id. For example {att1}
 $conf['settings']['schedule']['hide.blocked.periods'] = 'false';    	// if blocked periods should be hidden or shown
 
 /**
@@ -77,6 +77,7 @@ $conf['settings']['reservation']['updates.require.approval'] = 'false';		// if u
 $conf['settings']['reservation']['prevent.participation'] = 'false';		// if participation and invitation options should be removed
 $conf['settings']['reservation']['prevent.recurrence'] = 'false';			// if recurring reservations are disabled for non-administrators
 $conf['settings']['reservation']['enable.reminders'] = 'false';				// if reminders are enabled. this requires email to be enabled and the reminder job to be configured
+$conf['settings']['reservation']['waitinglist.scheduler'] = 'Scheduler';	// user name of the waitinglist scheduler
 /**
  * Email notification configuration
  */
@@ -165,9 +166,9 @@ $conf['settings']['password']['upper.and.lower'] = 'false';
 /**
  * Label display settings
  */
-$conf['settings']['reservation.labels']['ics.summary'] = '{title}';
+$conf['settings']['reservation.labels']['ics.summary'] = '{title} {waitinglist}';
 $conf['settings']['reservation.labels']['ics.my.summary'] = '{title}';
-$conf['settings']['reservation.labels']['rss.description'] = '<div><span>Start</span> {startdate}</div><div><span>End</span> {enddate}</div><div><span>Organizer</span> {name}</div><div><span>Description</span> {description}</div>';
+$conf['settings']['reservation.labels']['rss.description'] = '<div><span>Start</span> {startdate}</div><div><span>End</span> {enddate}</div><div><span>Organizer</span> {name}</div><div><span>Description</span> {description}</div><div>{waitinglist}</div>';
 $conf['settings']['reservation.labels']['my.calendar'] = '{resourcename} {title}';
 $conf['settings']['reservation.labels']['resource.calendar'] = '{name}';
 $conf['settings']['reservation.labels']['reservation.popup'] = '';

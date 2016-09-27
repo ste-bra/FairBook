@@ -211,6 +211,14 @@ class ReservationSavePage extends SecurePage implements IReservationSavePage
 		// set warnings variable
 	}
 
+	/**
+	 * @param bool $userJoinedWaitingList
+	 */
+	public function SetUserJoinedWaitingList($userJoinedWaitingList)
+	{
+		$this->Set('UserJoinedWaitingList', $userJoinedWaitingList);
+	}
+
 	public function GetReservationAction()
 	{
 		return $this->GetForm(FormKeys::RESERVATION_ACTION);
@@ -509,7 +517,7 @@ class ReservationSavePage extends SecurePage implements IReservationSavePage
 	/**
 	 * @return bool
 	 */
-	public function IsOnWaitingList()
+	public function GetIsOnWaitingList()
 	{
 		$val = $this->server->GetForm(FormKeys::IS_ON_WAITINGLIST);
 		if (isset($val))
@@ -520,6 +528,14 @@ class ReservationSavePage extends SecurePage implements IReservationSavePage
 		{
 			return false;
 		}
+	}
+
+	/**
+	 * @return int
+	 */
+	public function GetWaitingListPriority()
+	{
+		return intval($this->server->GetForm(FormKeys::WAITINGLIST_PRIORITY));
 	}
 }
 

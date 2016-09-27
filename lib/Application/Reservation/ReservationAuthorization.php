@@ -132,7 +132,7 @@ class ReservationAuthorization implements IReservationAuthorization
 	 */
 	private function IsAccessibleTo(ReservationView $reservationView, UserSession $currentUser)
 	{
-		if ($reservationView->OwnerId == $currentUser->UserId || $currentUser->IsAdmin)
+		if ($reservationView->OwnerId == $currentUser->UserId || $reservationView->IsWaitingListActive() || $currentUser->IsAdmin)
 		{
 			return true;
 		}

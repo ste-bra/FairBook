@@ -153,6 +153,11 @@ abstract class ReservationPage extends Page implements IReservationPage
 	 */
 	protected $initializationFactory;
 
+	/**
+	 * @var bool
+	 */
+	protected $hasWaitingList;
+
 	public function __construct($title = null)
 	{
 		parent::__construct($title);
@@ -355,5 +360,14 @@ abstract class ReservationPage extends Page implements IReservationPage
 	public function HideRecurrence($isHidden)
 	{
 		$this->Set('HideRecurrence', $isHidden);
+	}
+
+	/**
+	 * @param bool $hasActiveWaitingList
+	 */
+	public function SetHasActiveWaitingList($hasActiveWaitingList)
+	{
+		$this->hasWaitingList = $hasActiveWaitingList;
+		$this->Set('HasWaitingList', $hasActiveWaitingList);
 	}
 }

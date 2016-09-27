@@ -78,7 +78,14 @@ class SlotLabelFactory
 
 		if (($shouldHideUser || $shouldHideDetails) && (is_null($this->user) || ($this->user->UserId != $reservation->UserId && !$this->user->IsAdminForGroup($reservation->OwnerGroupIds()))))
 		{
-			return '';
+			if (BookedStringHelper::Contains($format, '{waitinglist}') && $reservation->IsWaitingListActive())
+			{
+				$format = '{waitinglist}';
+			}
+			else
+			{
+				return '';
+			}
 		}
 
 		if (empty($format))
@@ -140,6 +147,21 @@ class SlotLabelFactory
 			$label = str_replace('{reservationAttributes}', rtrim($attributesLabel->ToString(), ', '), $label);
 		}
 
+		if (BookedStringHelper::Contains($label, '{waitinglist}'))
+		{
+			if ($reservation->IsWaitingListActive())
+			{
+				$label = str_replace($name, '', $label);
+				$resources = Resources::GetInstance();
+				$label = str_replace('{waitinglist}', $resources->GetString('WaitingListLabel').': '.count($reservation->GetWaitingList()), $label);
+			}
+			else
+			{
+				$label = str_replace('{waitinglist}', '', $label);
+			}
+			
+		}
+		
 		return $label;
 	}
 

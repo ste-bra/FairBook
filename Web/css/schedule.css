@@ -3,7 +3,8 @@ table.reservations {
 	width: 100%;
 	font-size: 8pt;
 	table-layout: fixed;
-    border: solid #36648B 1px;
+    border: solid #36648B 2px;
+    margin-bottom: 5px;
 }
 
 table.reservations td {
@@ -108,6 +109,15 @@ td.reserved {
 
 .reserved.pending.hilite {
 	background-color: #ffc973;
+}
+
+.reserved.onWaitingList {
+	background-color: #ffe740;
+	color: black;
+}
+
+.reserved.onWaitingList.hilite {
+	background-color: #fff08c;
 }
 
 .reservable.hilite, #reservations .ui-selecting {

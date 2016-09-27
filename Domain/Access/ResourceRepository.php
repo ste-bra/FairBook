@@ -182,7 +182,7 @@ class ResourceRepository implements IResourceRepository
 			$resource->GetMaxLength(),
 			$resource->GetAutoAssign(),
 			$resource->GetRequiresApproval(),
-			$resource->HasWaitingList(),
+			$resource->GetHasWaitingList(),
 			$resource->GetAllowMultiday(),
 			$resource->GetMaxParticipants(),
 			$resource->GetMinNotice(),

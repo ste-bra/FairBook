@@ -23,6 +23,9 @@ along with Booked Scheduler.  If not, see <http://www.gnu.org/licenses/>.
 	{if $Slot->IsPending()}
 		{assign var=class value='pending'}
 	{/if}
+	{if $Slot->IsCurrentUserOnActiveWaitingList()}
+		{assign var=class value='onWaitingList'}
+	{/if}
 	{if $Slot->HasCustomColor()}
 		{assign var=color value='style="background-color:'|cat:$Slot->Color()|cat:';color:'|cat:$Slot->TextColor()|cat:';"'}
 	{/if}
@@ -148,6 +151,7 @@ along with Booked Scheduler.  If not, see <http://www.gnu.org/licenses/>.
 	<div class="legend reserved mine">{translate key=MyReservation}</div>
 	<div class="legend reserved participating">{translate key=Participant}</div>
 	<div class="legend reserved pending">{translate key=Pending}</div>
+	<div class="legend reserved onWaitingList">{translate key=MyWaitingListLegend}</div>
 	<div class="legend pasttime">{translate key=Past}</div>
 	<div class="legend restricted">{translate key=Restricted}</div>
 </div>

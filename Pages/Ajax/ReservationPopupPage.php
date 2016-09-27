@@ -115,7 +115,7 @@ class PopupFormatter
 
 		if (empty($label))
 		{
-			$label = "{name} {dates} {title} {resources} {participants} {accessories} {description} {attributes}";
+			$label = "{name} {dates} {title} {resources} {participants} {accessories} {description} {waitinglist} {attributes}";
 		}
 		$label = str_replace('{name}', $this->GetValue('name'), $label);
 		$label = str_replace('{dates}', $this->GetValue('dates'), $label);
@@ -124,6 +124,7 @@ class PopupFormatter
 		$label = str_replace('{participants}', $this->GetValue('participants'), $label);
 		$label = str_replace('{accessories}', $this->GetValue('accessories'), $label);
 		$label = str_replace('{description}', $this->GetValue('description'), $label);
+		$label = str_replace('{waitinglist}', $this->GetValue('waitingList'), $label);
 
 		if (strpos($label, '{attributes}') !== false)
 		{
@@ -267,6 +268,14 @@ class ReservationPopupPage extends Page implements IReservationPopupPage
 	{
 		$this->Set('attributes', $attributes);
 	}
+
+	/**
+	 * @param array|WaitingListEntry[] $waitingList
+	 */
+	public function SetWaitingList($waitingList)
+	{
+		$this->Set('waitingList', $waitingList);
+	}
 }
 
 
@@ -334,12 +343,27 @@ class ReservationPopupPresenter
 		$startDate = $reservation->StartDate->ToTimezone($tz);
 		$endDate = $reservation->EndDate->ToTimezone($tz);
 
-		$this->_page->SetName($reservation->OwnerFirstName, $reservation->OwnerLastName);
 		$this->_page->SetResources($reservation->Resources);
 		$this->_page->SetParticipants($reservation->Participants);
-		$this->_page->SetSummary($reservation->Description);
-		$this->_page->SetTitle($reservation->Title);
 		$this->_page->SetAccessories($reservation->Accessories);
+		
+		if ($reservation->IsWaitingListActive())
+		{
+			$entry = $reservation->GetWaitingListEntry($userSession->UserId);
+			
+			$this->_page->SetName('', '');
+			$this->_page->SetSummary($entry->Description());
+			$this->_page->SetTitle($entry->Title());
+			$this->_page->SetWaitingList($reservation->GetWaitingList());
+		}
+		else
+		{
+			$this->_page->SetName($reservation->OwnerFirstName, $reservation->OwnerLastName);
+			$this->_page->SetSummary($reservation->Description);
+			$this->_page->SetTitle($reservation->Title);
+			$this->_page->SetWaitingList(array());	
+		}
+
 
 		$this->_page->SetDates($startDate, $endDate);
 

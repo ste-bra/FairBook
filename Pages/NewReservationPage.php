@@ -64,6 +64,10 @@ class NewReservationPage extends ReservationPage implements INewReservationPage
 
 	protected function GetTemplateName()
 	{
+		if ($this->hasWaitingList)
+		{
+			return 'Reservation/createWaitingList.tpl';
+		}
 		return 'Reservation/create.tpl';
 	}
 

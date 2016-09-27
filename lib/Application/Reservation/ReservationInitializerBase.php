@@ -448,4 +448,14 @@ abstract class ReservationInitializerBase implements IReservationInitializer, IR
 	{
 		return true;
 	}
+
+	/**
+	 * @param bool $hasActiveWaitingList
+	 */
+	public function SetHasActiveWaitingList($hasActiveWaitingList)
+	{
+		$this->basePage->SetHasActiveWaitingList($hasActiveWaitingList);
+	}
 }
+
+?>

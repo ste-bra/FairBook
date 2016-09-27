@@ -69,6 +69,7 @@ class UpcomingReservationsPresenter
 
 		$startOfNextWeek = $today->AddDays(7-$dayOfWeek);
 
+		$labelFactory = new SlotLabelFactory($user);
 		$todays = array();
 		$tomorrows = array();
 		$thisWeeks = array();
@@ -78,6 +79,20 @@ class UpcomingReservationsPresenter
 		foreach ($reservations as $reservation)
 		{
 			$start = $reservation->StartDate->ToTimezone($timezone);
+
+			if ($reservation->IsWaitingListActive())
+			{
+				$reservation->FirstName = $labelFactory->Format($reservation, '{waitinglist}');
+				$reservation->LastName = '';
+
+				$entry = $reservation->GetWaitingListEntry($user->UserId);
+				if (isset($entry))
+				{
+					$reservation->Title = $entry->Title();
+					$reservation->Description = $entry->Description();
+					$reservation->UserId = $entry->UserId();
+				}
+			}
 
 			if ($start->DateEquals($today))
 			{

@@ -105,6 +105,14 @@ class ReservationUpdatePage extends ReservationSavePage implements IReservationU
 		// set warnings variable
 	}
 
+	/**
+	 * @param bool $userEditedWaitingList
+	 */
+	public function SetUserEditedWaitingList($userEditedWaitingList)
+	{
+		$this->Set('UserEditedWaitingList', $userEditedWaitingList);
+	}
+
 	public function GetReservationId()
 	{
 		return $this->GetForm(FormKeys::RESERVATION_ID);

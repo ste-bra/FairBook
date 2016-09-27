@@ -238,4 +238,18 @@ class ReservationSlot implements IReservationSlot
 	{
 		return $this->_reservation;
 	}
+
+	/**
+	 * @return bool
+	 */
+	public function IsCurrentUserOnActiveWaitingList()
+	{
+		if (!$this->_reservation->IsWaitingListActive())
+		{
+			return false;
+		}
+
+		$currentUserId = ServiceLocator::GetServer()->GetUserSession()->UserId;
+		return $this->_reservation->IsUserOnWaitingList($currentUserId);
+	}
 }

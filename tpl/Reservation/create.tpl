@@ -97,6 +97,7 @@ along with Booked Scheduler.  If not, see <http://www.gnu.org/licenses/>.
             </div>
             <div style="clear:both;height:0;">&nbsp;</div>
         </li>
+        {block name="dates"}
         <li>
             <label for="BeginDate" class="reservationDate">{translate key='BeginDate'}</label>
             <input type="text" id="BeginDate" class="dateinput" value="{formatdate date=$StartDate}"/>
@@ -134,6 +135,7 @@ along with Booked Scheduler.  If not, see <http://www.gnu.org/licenses/>.
 			{/foreach}
             </select>
         </li>
+        {/block}
         <li>
             <label>{translate key=ReservationLength}</label>
 

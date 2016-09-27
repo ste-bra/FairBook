@@ -665,6 +665,20 @@ class de_de extends en_us
 		$strings['ReservationEndingSoonSubject'] = 'Ihre Reservierung für %s endet bald';
 		$strings['UserAdded'] = 'Ein neuer Benutzer wurde hinzugefügt';
         // End Email Subjects
+        
+        // WaitingList
+        $strings['NumberOfPeopleOnWaitingList'] = 'Zur Zeit sind %s Leute auf der Warteliste';
+        $strings['IsOnWaitingList'] = 'Sie sind auf der Warteliste';
+        $strings['IsNotOnWaitingList'] = 'Sie sind nicht auf der Warteliste';
+        $strings['ResourceHasWaitingList'] = 'Reservierungen verwenden eine Warteliste';
+        $strings['ResourceHasWaitingListNone'] = 'Reservierungen verwenden keine Warteliste';
+        $strings['JoinedWaitingList'] = 'Sie sind der Warteliste beigetreten';
+        $strings['LeftWaitingList'] = 'Sie haben die Warteliste verlassen';
+        $strings['MyWaitingListLegend'] = 'Meine Warteliste';
+        $strings['WaitingListLabel'] = 'Warteliste';
+        $strings['JoinWaitingList'] = 'Beitreten';
+        $strings['LeaveWaitingList'] = 'Verlassen';
+        // End WaitingList
 
         $this->Strings = $strings;
 

@@ -24,7 +24,9 @@ along with Booked Scheduler.  If not, see <http://www.gnu.org/licenses/>.
 	{/if}
 	<br/>
 	<div class="createdMessage">{translate key=ReservationCreated}</div>
-	<div class="referenceNumber">{translate key=YourReferenceNumber args=$ReferenceNumber}</div>
+	{if $UserJoinedWaitingList}
+		<div class="waitingList">{translate key=JoinedWaitingList}</div>
+	{/if}
 
 	<div class="dates">
 		{foreach from=$Instances item=instance name=date_list}
@@ -39,9 +41,10 @@ along with Booked Scheduler.  If not, see <http://www.gnu.org/licenses/>.
 		{/foreach}
 	</div>
 
-	{if $RequiresApproval}
+	{if $RequiresApproval && !$UserJoinedWaitingList}
 		<div class="approvalMessage">{translate key=ReservationRequiresApproval}</div>
 	{/if}
+	<div class="referenceNumber">{translate key=YourReferenceNumber args=$ReferenceNumber}</div>
 
 	<input type="button" id="btnSaveSuccessful" value="{translate key='Close'}" class="button" />
 

@@ -24,6 +24,7 @@ require_once(ROOT_DIR . 'Domain/Values/AccountStatus.php');
 require_once(ROOT_DIR . 'Domain/Values/FullName.php');
 require_once(ROOT_DIR . 'Domain/Values/UserPreferences.php');
 require_once(ROOT_DIR . 'lib/Email/Messages/AccountCreationEmail.php');
+require_once(ROOT_DIR . 'lib/Application/Authentication/namespace.php');
 
 interface IUserRepository extends IUserViewRepository
 {
@@ -758,6 +759,38 @@ class UserRepository implements IUserRepository, IAccountActivationRepository
 		}
 
 		return null;
+	}
+
+	/**
+	 * @return User
+	 */
+	public function GetScheduler()
+	{
+		$schedulerUsername = Configuration::Instance()->GetSectionKey(ConfigSection::RESERVATION, ConfigKeys::RESERVATION_SCHEDULER);
+		
+		if (empty($schedulerUsername))
+		{
+			Log::Debug('Scheduler username not configured. Falling back on "Scheduler"');
+			$schedulerUsername = 'Scheduler';
+		}
+
+		$scheduler = $this->LoadByUsername($schedulerUsername);
+
+		if ($scheduler->Id() === null)
+		{
+			Log::Debug('Scheduler user not found. Adding user "'.$schedulerUsername.'" to database');
+			$scheduler = (new Registration())->Register(
+				$schedulerUsername,
+				Configuration::Instance()->GetSectionKey(ConfigSection::EMAIL, ConfigKeys::DEFAULT_FROM_ADDRESS),
+				$schedulerUsername,
+				$schedulerUsername,
+				bin2hex(openssl_random_pseudo_bytes(10)),
+				Configuration::Instance()->GetDefaultTimezone(),
+				Configuration::Instance()->GetKey(ConfigKeys::LANGUAGE),
+				Configuration::Instance()->GetKey(ConfigKeys::DEFAULT_HOMEPAGE, new IntConverter()));
+		}
+		
+		return $scheduler;
 	}
 }
 

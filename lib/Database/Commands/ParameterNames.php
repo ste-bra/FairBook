@@ -184,6 +184,8 @@ class ParameterNames
 
 	const VALUE = '@value';
 
+	const WAITINGLIST_PRIORITY = '@priority';
+
 
 	// used?
 	const FIRST_NAME_SETTING = '@fname_setting';

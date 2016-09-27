@@ -156,7 +156,7 @@ class ReservationViewRepository implements IReservationViewRepository
 			$this->SetAttributes($reservationView);
 			$this->SetAttachments($reservationView);
 			$this->SetReminders($reservationView);
-			$this->SetWaitingListEntries($reservationView);
+			$reservationView->PopulateWaitingList($reservationView->SeriesId);
 		}
 
 		return $reservationView;
@@ -354,24 +354,6 @@ class ReservationViewRepository implements IReservationViewRepository
 		}
 	}
 
-	/**
-	 * @param ReservationView $reservationView
-	 */
-	private function SetWaitingListEntries(ReservationView $reservationView)
-	{
-		$getWaitingListCommand = new GetWaitingListCommand($reservationView->SeriesId);
-		$result = ServiceLocator::GetDatabase()->Query($getWaitingListCommand);
-
-		$list = array();
-		while ($row = $result->GetRow())
-		{
-			$list[] = new ReservationWaitingListEntry($row[ColumnNames::USER_ID],
-												$row[ColumnNames::RESERVATION_TITLE],
-												$row[ColumnNames::RESERVATION_DESCRIPTION]);
-		}
-		$reservationView->SetWaitingList($list);
-	}
-
 	public function GetAccessoriesWithin(DateRange $dateRange)
 	{
 		$getAccessoriesCommand = new GetAccessoryListCommand($dateRange->GetBegin(), $dateRange->GetEnd());
@@ -549,33 +531,6 @@ class ReservationUserView
 	}
 }
 
-class NullReservationView extends ReservationView
-{
-	/**
-	 * @var NullReservationView
-	 */
-	private static $instance;
-
-	private function __construct()
-	{
-	}
-
-	public static function Instance()
-	{
-		if (is_null(self::$instance))
-		{
-			self::$instance = new NullReservationView();
-		}
-
-		return self::$instance;
-	}
-
-	public function IsDisplayable()
-	{
-		return false;
-	}
-}
-
 class ReservationAccessoryView
 {
 	/**
@@ -613,7 +568,122 @@ class ReservationAccessoryView
 	}
 }
 
-class ReservationView
+abstract class ReservationViewBase
+{
+	/**
+	 * @var null|int
+	 */
+	protected $UserId = null;
+	
+	/**
+	 * @var null|int
+	 */
+	protected $OwnerId = null;
+	
+	/**
+	 * @var array|ReservationWaitingListEntry[]
+	 */
+	private $waitingList = array();
+
+	/**
+	 * @return array|ReservationWaitingListEntry[]
+	 */
+	public function GetWaitingList()
+	{
+		return $this->waitingList;
+	}
+
+	/**
+	 * @param array|ReservationWaitingListEntry[] $list
+	 */
+	public function SetWaitingList($list)
+	{
+		$this->waitingList = $list;
+	}
+
+	/**
+	 * @param int $seriesId
+	 */
+	public function PopulateWaitingList($seriesId)
+	{
+		$getWaitingListCommand = new GetWaitingListCommand($seriesId);
+		$result = ServiceLocator::GetDatabase()->Query($getWaitingListCommand);
+
+		while ($row = $result->GetRow())
+		{
+			$this->waitingList[] = new ReservationWaitingListEntry($row[ColumnNames::USER_ID],
+												$row[ColumnNames::RESERVATION_TITLE],
+												$row[ColumnNames::RESERVATION_DESCRIPTION],
+												$row[ColumnNames::WAITINGLIST_PRIORITY]);
+		}
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function IsWaitingListActive()
+	{
+		$schedulerId = (new UserRepository)->GetScheduler()->Id();
+
+		if ((isset($this->OwnerId) && $schedulerId == $this->OwnerId) || (isset($this->UserId) && $schedulerId == $this->UserId))
+		{
+			return true;
+		}
+		
+		return false;
+	}
+
+	/**
+	 * @param int $UserId
+	 * @return ReservationWaitingListEntry
+	 */
+	public function GetWaitingListEntry($UserId)
+	{
+		foreach ($this->waitingList as $entry)
+		{
+			if ($entry->UserId() == $UserId)
+			{
+				return $entry;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * @param int $UserId
+	 * @return bool
+	 */
+	public function IsUserOnWaitingList($UserId)
+	{
+		$entry = $this->GetWaitingListEntry($UserId);
+		
+		if ($entry !== null)
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * @param int $UserId
+	 * @return int
+	 */
+	public function GetWaitingListPriority($UserId)
+	{
+		$entry = $this->GetWaitingListEntry($UserId);
+		
+		if ($entry !== null)
+		{
+			return $entry->Priority();
+		}
+
+		return WaitingListPriority::NORMAL;
+	}
+}
+
+class ReservationView extends ReservationViewBase
 {
 	public $ReservationId;
 	public $SeriesId;
@@ -715,11 +785,6 @@ class ReservationView
 	public $AllowParticipation = false;
 
 	/**
-	 * @var array|ReservationWaitingListEntry[]
-	 */
-	protected $waitingList = array();
-
-	/**
 	 * @param AttributeValue $attribute
 	 */
 	public function AddAttribute(AttributeValue $attribute)
@@ -772,21 +837,32 @@ class ReservationView
 	{
 		$this->Attachments[] = $attachment;
 	}
+}
 
+class NullReservationView extends ReservationView
+{
 	/**
-	 * @return array|ReservationWaitingListEntry[]
+	 * @var NullReservationView
 	 */
-	public function GetWaitingList()
+	private static $instance;
+
+	private function __construct()
 	{
-		return $this->waitingList;
 	}
 
-	/**
-	 * @param array|ReservationWaitingListEntry[] $list
-	 */
-	public function SetWaitingList($list)
+	public static function Instance()
 	{
-		$this->waitingList = $list;
+		if (is_null(self::$instance))
+		{
+			self::$instance = new NullReservationView();
+		}
+
+		return self::$instance;
+	}
+
+	public function IsDisplayable()
+	{
+		return false;
 	}
 }
 
@@ -844,7 +920,7 @@ interface IReservedItemView
 	public function BufferedTimes();
 }
 
-class ReservationItemView implements IReservedItemView
+class ReservationItemView extends ReservationViewBase implements IReservedItemView
 {
 	/**
 	 * @var string
@@ -1248,6 +1324,8 @@ class ReservationItemView implements IReservedItemView
 			$view->EndReminder = new ReservationReminderView($row[ColumnNames::END_REMINDER_MINUTES_PRIOR]);
 		}
 
+		$view->PopulateWaitingList($view->SeriesId);
+
 		return $view;
 	}
 
@@ -1294,6 +1372,8 @@ class ReservationItemView implements IReservedItemView
 		$item->CreatedDate = $r->DateCreated;
 		$item->ModifiedDate = $r->DateModified;
 		$item->OwnerEmailAddress = $r->OwnerEmailAddress;
+
+		$item->SetWaitingList($r->GetWaitingList());
 
 		return $item;
 	}

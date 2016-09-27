@@ -24,14 +24,6 @@ class WaitingListAddRule implements IReservationValidationRule
 	 */
 	public function Validate($reservationSeries)
 	{
-		if ($reservationSeries->StatusId() == ReservationStatus::Pending)
-		{
-			$reservationSeries->SetAddedToWaitingList(new ReservationWaitingListEntry($reservationSeries->UserId(), $reservationSeries->Title(), $reservationSeries->Description()));
-			$reservationSeries->SetUserId(2); /// ToDo variable userId for scheduler
-			$reservationSeries->SetTitle('');
-			$reservationSeries->SetDescription('');
-		}
-
 		return new ReservationRuleResult();
 	}
 }

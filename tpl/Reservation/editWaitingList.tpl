@@ -18,8 +18,40 @@ along with Booked Scheduler.  If not, see <http://www.gnu.org/licenses/>.
 *}
 {extends file="Reservation/edit.tpl"}
 
+{block name="dates"}
+<div class="dateSection">
+<li>
+	<label>{translate key='BeginDate'}</label> {formatdate date=$StartDate}
+	<input type="hidden" id="BeginDate" class="dateinput" value="{formatdate date=$StartDate}"/>
+	<input type="hidden" id="formattedBeginDate" {formname key=BEGIN_DATE} value="{formatdate date=$StartDate key=system}"/>
+	{foreach from=$StartPeriods item=period}
+		{if $period eq $SelectedStart}
+			{$period->Label()} <br/>
+			<input type="hidden" id="BeginPeriod" {formname key=BEGIN_PERIOD} value="{$period->Begin()}"/>
+		{/if}
+	{/foreach}
+</li>
+<li>
+	<label>{translate key='EndDate'}</label> {formatdate date=$EndDate}
+	<input type="hidden" id="EndDate" class="dateinput" value="{formatdate date=$EndDate}"/>
+	<input type="hidden" id="formattedEndDate" {formname key=END_DATE} value="{formatdate date=$EndDate key=system}"/>
+	{foreach from=$EndPeriods item=period}
+		{if $period eq $SelectedEnd}
+			{$period->LabelEnd()} <br/>
+			<input type="hidden" id="EndPeriod" {formname key=END_PERIOD} value="{$period->End()}"/>
+		{/if}
+	{/foreach}
+</li>
+</div>
+{/block}
+
 {block name="waitingList"}
 	<div class="waitingList">
+		<div class="priority">Priority
+			<input type="Radio" name="WaitingListPriority" id="priorityHigh" value="3" {if $WaitingListPriority == WaitingListPriority::HIGH}checked{/if}/><label for="priorityHigh">High</label>
+			<input type="Radio" name="WaitingListPriority" id="priorityNormal" value="2" {if !$IAmOnWaitingList || $WaitingListPriority == WaitingListPriority::NORMAL}checked{/if}/><label for="priorityNormal">Normal</label>
+			<input type="Radio" name="WaitingListPriority" id="priorityLow" value="1" {if $WaitingListPriority == WaitingListPriority::LOW}checked{/if}/><label for="priorityLow">Low</label>
+		</div>
 		{if $IAmOnWaitingList}
 			<span class="onWaitingListInfo">{translate key=IsOnWaitingList}</span>
 			<input type="hidden" {formname key=IS_ON_WAITINGLIST} value="1"/><br/>
@@ -32,16 +64,16 @@ along with Booked Scheduler.  If not, see <http://www.gnu.org/licenses/>.
 {/block}
 
 {block name=deleteButtons}
-	{if $IAmOnWaitingList}
+	{if $CanDelete}
 		{if $IsRecurring}
 			<a href="#" class="delete prompt">
 				{html_image src="cross-button.png"}
-				{translate key='Delete'}
+				{translate key='LeaveWaitingList'}
 			</a>
 		{else}
 			<a href="#" class="delete save">
 				{html_image src="cross-button.png"}
-				{translate key='Delete'}
+				{translate key='LeaveWaitingList'}
 			</a>
 		{/if}
 	{/if}
@@ -56,7 +88,7 @@ along with Booked Scheduler.  If not, see <http://www.gnu.org/licenses/>.
 	{if $IsRecurring}
 		<button type="button" class="button update prompt">
 			<img src="img/tick-circle.png" />
-			{translate key='Update'}
+			{translate key='JoinWaitingList'}
 		</button>
 		<div class="updateButtons" style="display:none;" title="{translate key=ApplyUpdatesTo}">
 			<div style="text-align: center;line-height:50px;">
@@ -81,7 +113,11 @@ along with Booked Scheduler.  If not, see <http://www.gnu.org/licenses/>.
 	{else}
 		<button type="button" class="button save update btnCreate">
 			<img src="img/disk-black.png" />
-			{translate key='Update'}
+			{if $IAmOnWaitingList}
+				{translate key='Update'}
+			{else}
+				{translate key='JoinWaitingList'}
+			{/if}
 		</button>
 	{/if}
 	<button type="button" class="button btnPrint">

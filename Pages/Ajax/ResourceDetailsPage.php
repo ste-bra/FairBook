@@ -58,6 +58,7 @@ class ResourceDetailsPage extends Page implements IResourceDetailsPage
         $this->Set('minimumNotice', $resource->GetMinNotice());
         $this->Set('requiresApproval', $resource->GetRequiresApproval());
         $this->Set('autoAssign', $resource->GetAutoAssign());
+        $this->Set('hasWaitingList', $resource->GetHasWaitingList());
 
         if ($resource->HasImage())
         {

@@ -703,6 +703,12 @@ class en_us extends Language
 		$strings['IsNotOnWaitingList'] = 'You are not on the waiting list';
 		$strings['ResourceHasWaitingList'] = 'Reservations use a waiting list';
 		$strings['ResourceHasWaitingListNone'] = 'Reservations do not use a waiting list';
+		$strings['JoinedWaitingList'] = 'You joined the waiting list';
+		$strings['LeftWaitingList'] = 'You left the waiting list';
+		$strings['MyWaitingListLegend'] = 'My Waiting List';
+		$strings['WaitingListLabel'] = 'Waiting List';
+		$strings['JoinWaitingList'] = 'Join';
+		$strings['LeaveWaitingList'] = 'Leave';
 		// End WaitingList
 
 		$this->Strings = $strings;

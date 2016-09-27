@@ -579,6 +579,11 @@ const GET_RESERVATION_LIST_TEMPLATE =
 			INNER JOIN schedules ON resources.schedule_id = schedules.schedule_id
 			LEFT JOIN reservation_reminders start_reminder ON start_reminder.series_id = rs.series_id AND start_reminder.reminder_type = 0
 			LEFT JOIN reservation_reminders end_reminder ON end_reminder.series_id = rs.series_id AND end_reminder.reminder_type = 1
+			LEFT JOIN 
+				(SELECT series_id, GROUP_CONCAT(rwl.user_id) AS list
+					FROM reservation_waiting_list AS rwl
+					GROUP BY series_id) AS wl
+				ON wl.series_id = rs.series_id
 			[JOIN_TOKEN]
 			WHERE rs.status_id <> 2
 			[AND_TOKEN]
@@ -1012,7 +1017,7 @@ const GET_RESERVATION_LIST_TEMPLATE =
 		WHERE (username = @username OR email = @username) AND status_id = 1';
 
 	const ADD_WAITING_LIST_ENTRY =
-			'INSERT INTO reservation_waiting_list (series_id, user_id, title, description) VALUES (@seriesid, @userid, @title, @description)';
+			'INSERT INTO reservation_waiting_list (series_id, user_id, title, description, priority) VALUES (@seriesid, @userid, @title, @description, @priority)';
 
 	const GET_WAITING_LIST = 'SELECT * FROM reservation_waiting_list WHERE series_id = @seriesid';
 
@@ -1020,7 +1025,8 @@ const GET_RESERVATION_LIST_TEMPLATE =
 			'UPDATE reservation_waiting_list
 		SET
 			title = @title,
-			description = @description
+			description = @description,
+			priority = @priority
 		WHERE
 			series_id = @seriesid AND user_id = @userid';
 
@@ -1060,7 +1066,8 @@ class QueryBuilder
 						FROM custom_attribute_values cav WHERE cav.entity_id = ri.series_id AND cav.attribute_category = 1) as attribute_list,
 
 					(SELECT GROUP_CONCAT(CONCAT(p.name, "=", p.value) SEPARATOR "!sep!")
-						FROM user_preferences p WHERE owner.user_id = p.user_id) as preferences';
+						FROM user_preferences p WHERE owner.user_id = p.user_id) as preferences,
+					wl.list AS waiting_list';
 
 	private static function Build($selectValue, $joinValue, $andValue)
 	{
@@ -1071,8 +1078,11 @@ class QueryBuilder
 
 	public static function GET_RESERVATION_LIST()
 	{
+		$schedulerId = (new UserRepository)->GetScheduler()->Id();
+		
 		return self::Build(self::$SELECT_LIST_FRAGMENT, null, 'AND ' . self::$DATE_FRAGMENT . ' AND
-					(@userid = -1 OR ru.user_id = @userid) AND
+					(@userid = -1 OR ru.user_id = @userid OR 
+						(rs.owner_id = ' . $schedulerId . ' AND FIND_IN_SET(@userid, wl.list) > 0)) AND
 					(@levelid = 0 OR ru.reservation_user_level = @levelid) AND
 					(@scheduleid = -1 OR resources.schedule_id = @scheduleid) AND
 					(@resourceid = -1 OR rr.resource_id = @resourceid) ');

@@ -64,7 +64,7 @@ class ReservationRepository implements IReservationRepository
 		$database = ServiceLocator::GetDatabase();
 
 		$seriesId = $this->InsertSeries($reservationSeries);
-
+		
 		$reservationSeries->SetSeriesId($seriesId);
 
 		$instances = $reservationSeries->Instances();
@@ -96,7 +96,7 @@ class ReservationRepository implements IReservationRepository
 				$database->Execute($updateReservationCommand);
 			}
 
-			$updateWaitingListCommand = new UpdateWaitingListCommand($currentId, $newSeriesId);
+			$updateWaitingListCommand = new UpdateWaitingListCommand($currentId, $newSeriesId);// not sure if necessary
 			$database->Execute($updateWaitingListCommand);
 		}
 		else
@@ -219,14 +219,14 @@ class ReservationRepository implements IReservationRepository
 		$entry = $reservationSeries->GetAddedToWaitingList();
 		if (isset($entry))
 		{
-			$addToWaitingListCommand = new AddToWaitingListCommand($reservationSeries->SeriesId(), $entry->UserId(), $entry->Title(), $entry->Description());
+			$addToWaitingListCommand = new AddToWaitingListCommand($reservationSeries->SeriesId(), $entry->UserId(), $entry->Title(), $entry->Description(), $entry->Priority());
 			$database->Execute($addToWaitingListCommand);
 		}
 
 		$entry = $reservationSeries->GetEditedWaitingListEntry();
 		if (isset($entry))
 		{
-			$editWaitingListCommand = new EditWaitingListCommand($reservationSeries->SeriesId(), $entry->UserId(), $entry->Title(), $entry->Description());
+			$editWaitingListCommand = new EditWaitingListCommand($reservationSeries->SeriesId(), $entry->UserId(), $entry->Title(), $entry->Description(), $entry->Priority());
 			$database->Execute($editWaitingListCommand);			
 		}
 	}
@@ -392,7 +392,8 @@ class ReservationRepository implements IReservationRepository
 		{
 			$series->AddWaitingListEntry(new ReservationWaitingListEntry($row[ColumnNames::USER_ID],
 												$row[ColumnNames::RESERVATION_TITLE],
-												$row[ColumnNames::RESERVATION_DESCRIPTION]));
+												$row[ColumnNames::RESERVATION_DESCRIPTION],
+												$row[ColumnNames::WAITINGLIST_PRIORITY]));
 		}
 	}
 

@@ -234,12 +234,18 @@ class CalendarReservation
 
 	private static function GetClass(ReservationItemView $reservation)
 	{
+		$user = ServiceLocator::GetServer()->GetUserSession();
+		
+		if ($reservation->IsWaitingListActive() && $reservation->IsUserOnWaitingList($user->UserId))
+		{
+			return 'reserved onWaitingList';
+		}
+		
 		if ($reservation->RequiresApproval)
 		{
 			return 'reserved pending';
 		}
 
-		$user = ServiceLocator::GetServer()->GetUserSession();
 
 		if ($reservation->IsUserOwner($user->UserId))
 		{

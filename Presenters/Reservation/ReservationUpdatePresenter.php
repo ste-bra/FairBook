@@ -162,11 +162,11 @@ class ReservationUpdatePresenter implements IReservationUpdatePresenter
 
 		if ($this->page->GetHasWaitingList())
 		{
-			$entry = New ReservationWaitingListEntry($this->userSession->UserId, $existingSeries->Title(), $existingSeries->Description());
+			$entry = New ReservationWaitingListEntry($this->userSession->UserId, $existingSeries->Title(), $existingSeries->Description(), $this->page->GetWaitingListPriority());
 			$existingSeries->SetTitle('');
 			$existingSeries->SetDescription('');
 
-			if ($this->page->IsOnWaitingList())
+			if ($this->page->GetIsOnWaitingList())
 			{
 				$existingSeries->SetEditedWaitingListEntry($entry);
 			}
@@ -190,6 +190,8 @@ class ReservationUpdatePresenter implements IReservationUpdatePresenter
 		{
 			$this->page->SetRequiresApproval($reservationSeries->RequiresApproval());
 			$this->page->SetReferenceNumber($reservationSeries->CurrentInstance()->ReferenceNumber());
+			$this->page->SetUserJoinedWaitingList($reservationSeries->GetAddedToWaitingList() !== null);
+			$this->page->SetUserEditedWaitingList($reservationSeries->GetEditedWaitingListEntry() !== null);
 		}
 	}
 

@@ -19,27 +19,37 @@ along with Booked Scheduler.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 require_once(ROOT_DIR . 'lib/Common/namespace.php');
-require_once(ROOT_DIR . 'Domain/ReservationAttachment.php');
+require_once(ROOT_DIR . 'Domain/Values/WaitingListPriority.php');
 
 class ReservationWaitingListEntry
 {
 	/**
-	 * @var int
+	 * @var string
 	 */
 	protected $userId;
-
-	/**
-	 * @return int
-	 */
-	public function UserId()
-	{
-		return $this->userId;
-	}
 
 	/**
 	 * @var string
 	 */
 	protected $title;
+
+	/**
+	 * @var string
+	 */
+	protected $description;
+
+	/**
+	 * @var string
+	 */
+	protected $priority;
+
+	/**
+	 * @return string
+	 */
+	public function UserId()
+	{
+		return $this->userId;
+	}
 
 	/**
 	 * @return string
@@ -50,11 +60,6 @@ class ReservationWaitingListEntry
 	}
 
 	/**
-	 * @var string
-	 */
-	protected $description;
-
-	/**
 	 * @return string
 	 */
 	public function Description()
@@ -62,11 +67,20 @@ class ReservationWaitingListEntry
 		return $this->description;
 	}
 
-	public function __construct($userId, $title, $description)
+	/**
+	 * @return string
+	 */
+	public function Priority()
+	{
+		return $this->priority;
+	}
+
+	public function __construct($userId, $title, $description, $priority)
 	{
 		$this->userId = $userId;
 		$this->title = $title;
 		$this->description = $description;
+		$this->priority = $priority;
 	}
 }
 

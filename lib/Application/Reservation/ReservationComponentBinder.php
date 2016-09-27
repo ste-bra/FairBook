@@ -66,6 +66,7 @@ class ReservationDateBinder implements IReservationComponentBinder
 		$initializer->SetDates($startDate, $endDate, $startPeriods, $endPeriods);
 
 		$hideRecurrence = !$initializer->CurrentUser()->IsAdmin && Configuration::Instance()->GetSectionKey(ConfigSection::RESERVATION,
+			ConfigKeys::RESERVATION_PREVENT_RECURRENCE,
 			new BooleanConverter());
 		$initializer->HideRecurrence($hideRecurrence);
 	}
@@ -146,11 +147,15 @@ class ReservationResourceBinder implements IReservationComponentBinder
 			return;
 		}
 
+		$currentUser = ServiceLocator::GetServer()->GetUserSession();
+		$hasWL = $resources[$requestedResourceId]->GetHasWaitingList() && !$currentUser->IsAdmin && !$currentUser->IsGroupAdmin;
+
+		$initializer->SetHasActiveWaitingList($hasWL);
 		$initializer->BindResourceGroups($groups);
 		$initializer->BindAvailableResources($resources);
 		$accessories = $this->resourceService->GetAccessories();
 		$initializer->BindAvailableAccessories($accessories);
-		$initializer->ShowAdditionalResources($bindableResourceData->NumberAccessible > 0 && !$resources[$requestedResourceId]->GetHasWaitingList());
+		$initializer->ShowAdditionalResources($bindableResourceData->NumberAccessible > 0 && !$hasWL);
 		$initializer->SetReservationResource($bindableResourceData->ReservationResource);
 	}
 
@@ -317,8 +322,19 @@ class ReservationDetailsBinder implements IReservationComponentBinder
 			$this->page->SetEndReminder($this->reservationView->EndReminder->GetValue(),
 				$this->reservationView->EndReminder->GetInterval());
 		}
-		$this->page->SetWaitingList($this->reservationView->GetWaitingList());
-		$this->page->SetCurrentUserOnWaitingList($this->IsCurrentUserOnWaitingList($currentUser->UserId));
+
+		if ($this->reservationView->IsWaitingListActive())
+		{
+			$isUserOnWaitingList = $this->reservationView->IsUserOnWaitingList($currentUser->UserId);
+			$this->page->SetIsUserOnWaitingList($isUserOnWaitingList);
+			$this->page->SetWaitingList($this->reservationView->GetWaitingList());
+			$this->page->SetWaitingListPriority($this->reservationView->GetWaitingListPriority($currentUser->UserId));
+			$this->page->SetCanDelete($isUserOnWaitingList || $currentUser->IsAdmin || $currentUser->IsGroupAdmin);
+		}
+		else
+		{
+			$initializer->SetHasActiveWaitingList(false);
+		}
 	}
 
 	private function IsCurrentUserParticipating($currentUserId)
@@ -369,14 +385,14 @@ class ReservationDetailsBinder implements IReservationComponentBinder
 	}
 
 	/**
-	 * @param int $currentUserId
+	 * @param int $UserId
 	 * @return string
 	 */
-	private function DetermineTitle($currentUserId)
+	private function DetermineTitle($UserId)
 	{
 		foreach ($this->reservationView->GetWaitingList() as $entry)
 		{
-			if ($entry->UserId() == $currentUserId)
+			if ($entry->UserId() == $UserId)
 			{
 				return $entry->Title();
 			}
@@ -385,35 +401,19 @@ class ReservationDetailsBinder implements IReservationComponentBinder
 	}
 
 	/**
-	 * @param int $currentUserId
+	 * @param int $UserId
 	 * @return string
 	 */
-	private function DetermineDescription($currentUserId)
+	private function DetermineDescription($UserId)
 	{
 		foreach ($this->reservationView->GetWaitingList() as $entry)
 		{
-			if ($entry->UserId() == $currentUserId)
+			if ($entry->UserId() == $UserId)
 			{
 				return $entry->Description();
 			}
 		}
 		return $this->reservationView->Description;
-	}
-
-	/**
-	 * @param int $currentUserId
-	 * @return bool
-	 */
-	private function IsCurrentUserOnWaitingList($currentUserId)
-	{
-		foreach ($this->reservationView->GetWaitingList() as $entry)
-		{
-			if ($entry->UserId() == $currentUserId)
-			{
-				return true;
-			}
-		}
-		return false;
 	}
 }
 

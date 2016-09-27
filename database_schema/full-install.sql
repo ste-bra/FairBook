@@ -740,6 +740,7 @@ CREATE TABLE `reservation_waiting_list` (
  `user_id` mediumint(8) unsigned NOT NULL,
  `title` varchar(85) NOT NULL,
  `description` text,
+ `priority` smallint(5) unsigned DEFAULT '2',
  PRIMARY KEY (`series_id`, `user_id`),
  INDEX (`series_id`),
  FOREIGN KEY (`series_id`) 

@@ -2113,13 +2113,14 @@ class UpdateUserSessionCommand extends SqlCommand
 
 class AddToWaitingListCommand extends SqlCommand
 {
-	public function __construct($seriesId, $userId, $title, $description)
+	public function __construct($seriesId, $userId, $title, $description, $priority)
 	{
 		parent::__construct(Queries::ADD_WAITING_LIST_ENTRY);
 		$this->AddParameter(new Parameter(ParameterNames::SERIES_ID, $seriesId));
 		$this->AddParameter(new Parameter(ParameterNames::USER_ID, $userId));
 		$this->AddParameter(new Parameter(ParameterNames::TITLE, $title));
 		$this->AddParameter(new Parameter(ParameterNames::DESCRIPTION, $description));
+		$this->AddParameter(new Parameter(ParameterNames::WAITINGLIST_PRIORITY, $priority));
 	}
 }
 
@@ -2144,13 +2145,14 @@ class GetWaitingListCommand extends SqlCommand
 
 class EditWaitingListCommand extends SqlCommand
 {
-	public function __construct($seriesId, $userId, $title, $description)
+	public function __construct($seriesId, $userId, $title, $description, $priority)
 	{
 		parent::__construct(Queries::EDIT_WAITING_LIST);
 		$this->AddParameter(new Parameter(ParameterNames::SERIES_ID, $seriesId));
 		$this->AddParameter(new Parameter(ParameterNames::USER_ID, $userId));
 		$this->AddParameter(new Parameter(ParameterNames::TITLE, $title));
 		$this->AddParameter(new Parameter(ParameterNames::DESCRIPTION, $description));
+		$this->AddParameter(new Parameter(ParameterNames::WAITINGLIST_PRIORITY, $priority));
 	}
 }
 

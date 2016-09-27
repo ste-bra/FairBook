@@ -85,6 +85,13 @@ along with Booked Scheduler.  If not, see <http://www.gnu.org/licenses/>.
 				{/if}
 			</li>
 			<li>
+				{if $hasWaitingList}
+					{translate key='ResourceHasWaitingList'}
+				{else}
+					{translate key='ResourceHasWaitingListNone'}
+				{/if}
+			</li>
+			<li>
 				{if $minimumNotice neq ''}
 					{translate key='ResourceMinNotice' args=$minimumNotice}
 				{else}

@@ -353,14 +353,24 @@ class ExistingReservationSeries extends ReservationSeries
 		}
 		else
 		{
-			Log::Debug("Removing series %s", $this->SeriesId());
-
 			if ($this->IsUserOnWaitingList($deletedBy) && count($this->GetWaitingList()) > 1)
 			{
+				Log::Debug("Removing user %s from waiting list of series %s", $deletedBy, $this->SeriesId());
 				$this->AddEvent(new RemovedFromWaitingListEvent($this, $deletedBy->UserId));
+				
+				$reservationRepository = new ReservationRepository();
+				
+				foreach ($this->attachmentIds as $fileId => $value)
+				{
+					if ($reservationRepository->LoadReservationAttachment($fileId)->UserId() == $deletedBy->UserId)
+					{
+						$this->RemoveAttachment($fileId);
+					}
+				}
 			}
 			else
 			{
+				Log::Debug("Removing series %s", $this->SeriesId());
 				$this->AddEvent(new SeriesDeletedEvent($this));
 			}
 		}

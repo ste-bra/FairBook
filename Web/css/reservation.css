@@ -208,3 +208,20 @@ label.reservationDate {
 .notOnWaitingListInfo {
 	color: #D50000;
 }
+
+.priority {
+	padding-bottom:10px;
+}
+
+input[type="radio"] {
+	margin-left: 15px;
+}
+
+.dateSection {
+	padding: 5px 0 5px;
+}
+
+.referenceNumber {
+	margin: 15px 0;
+	font-size:smaller;
+}
