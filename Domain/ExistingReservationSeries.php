@@ -683,6 +683,26 @@ class ExistingReservationSeries extends ReservationSeries
 	}
 
 	/**
+	 * Removes all attachments that dont belong to user with user id $userId
+	 *
+	 * @param int $userId
+	 */
+	public function RemoveRedundantAttachments($userId)
+	{
+		$reservationRepository = new ReservationRepository();
+
+		foreach ($this->attachmentIds as $fileId => $value)
+		{
+			$attachmentUserId = $reservationRepository->LoadReservationAttachment($fileId)->UserId();
+			if ($attachmentUserId != $userId)
+			{
+				$this->RemoveAttachment($fileId);
+				Log::Debug("Removed attachment ".$fileId." attached to reservation series ".$this->SeriesId()." by user ".$attachmentUserId);
+			}
+		}
+	}
+
+	/**
 	 * @return array|int[]
 	 */
 	public function RemovedAttachmentIds()

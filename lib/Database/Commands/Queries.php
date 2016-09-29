@@ -1030,10 +1030,12 @@ const GET_RESERVATION_LIST_TEMPLATE =
 		WHERE
 			series_id = @seriesid AND user_id = @userid';
 
-	const UPDATE_WAITING_LIST =
-			'UPDATE reservation_waiting_list
-		SET
-			series_id = @newseriesid
+	const COPY_WAITING_LIST =
+			'INSERT INTO reservation_waiting_list (series_id, user_id, title, description, priority)
+		SELECT
+			@newseriesid, user_id, title, description, priority
+		FROM
+			reservation_waiting_list
 		WHERE
 			series_id = @seriesid';
 

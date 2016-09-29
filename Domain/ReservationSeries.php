@@ -673,6 +673,23 @@ class ReservationSeries
 	}
 
 	/**
+	 * @param int $UserId
+	 * @return ReservationWaitingListEntry
+	 */
+	public function GetWaitingListEntry($UserId)
+	{
+		foreach ($this->waitingList as $entry)
+		{
+			if ($entry->UserId() == $UserId)
+			{
+				return $entry;
+			}
+		}
+
+		return null;
+	}
+	
+	/**
 	 * @param UserSession $userSession
 	 * @return bool
 	 */

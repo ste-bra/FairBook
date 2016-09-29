@@ -96,7 +96,7 @@ class ReservationRepository implements IReservationRepository
 				$database->Execute($updateReservationCommand);
 			}
 
-			$updateWaitingListCommand = new UpdateWaitingListCommand($currentId, $newSeriesId);// not sure if necessary
+			$updateWaitingListCommand = new CopyWaitingListCommand($currentId, $newSeriesId);
 			$database->Execute($updateWaitingListCommand);
 		}
 		else

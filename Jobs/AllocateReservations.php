@@ -31,6 +31,9 @@ This script must be executed every minute for to enable Reservation Reminders fu
 
 define('ROOT_DIR', dirname(__FILE__) . '/../');
 require_once(ROOT_DIR . 'Domain/Access/namespace.php');
+require_once(ROOT_DIR . 'lib/Application/Authentication/namespace.php');
+require_once(ROOT_DIR . 'lib/Application/Authorization/namespace.php');
+require_once(ROOT_DIR . 'lib/Email/namespace.php');
 require_once(ROOT_DIR . 'Jobs/JobCop.php');
 
 Log::Debug('Running AllocateReservations.php');
@@ -57,36 +60,47 @@ class ReservationsAllocator
 	const MINUTES_TO_SUBSTRACT = 40320; // 4 weeks
 
 	private $today;
+	private $userRepository;
+	private $resourceRepository;
 	private $reservationViewRepository;
 	private $reservationRepository;
+	private $scheduler;
+	private $schedulerSession;
 
 	public function __construct()
 	{
 		$this->today = Date::Now()->GetDate();
+		$this->userRepository = new UserRepository();
+		$this->resourceRepository = new ResourceRepository();
 		$this->reservationViewRepository = new ReservationViewRepository();
 		$this->reservationRepository = new ReservationRepository();
+
+		$this->scheduler = $this->userRepository->GetScheduler();
+		$authentication = new Authentication(new AuthorizationService($this->userRepository), $this->userRepository);
+		$this->schedulerSession = $authentication->Login($this->scheduler->Username(), new WebServiceLoginContext());
 	}
 
 	public function Execute()
 	{
 		$start = microtime(true);
-		$allocatedReservations = array();
 		$reservationAllocations = array();
 		
 		$sortedReservations = $this->GetReservationsByResourcesByDay();
 		$allPriorities = $this->GetAllPriorities($sortedReservations);
-		$this->EchoResults2($sortedReservations);
+
 		foreach ($sortedReservations as $reservations)
 		{
 			$userPreferences = $this->GetUserPreferences($reservations);
 			$priorities = array_intersect_key($allPriorities, $userPreferences);
 
+			//ToDo Quota-Check each user for current resource 
+
 			$reservationAllocations += $this->DetermineReservationAllocations($reservations, $userPreferences, $priorities);
-			//$allocatedReservations = $this->AllocateReservations($reservations, $reservationAllocations);
+			$this->AllocateReservations($reservations, $reservationAllocations);
 		}
 
-		$this->Persist($allocatedReservations);
-		$this->EchoResults($sortedReservations, $reservationAllocations);
+		$this->NotifyUsers($sortedReservations);
+		$this->LogResults($sortedReservations);
 		
 		$end = microtime(true);
 		echo $end - $start;
@@ -101,7 +115,7 @@ class ReservationsAllocator
 	private function GetReservationsByResourcesByDay()
 	{
 		$sortedReservations = array();
-		$schedulerId = (new UserRepository)->GetScheduler()->Id();
+		$schedulerId = $this->scheduler->Id();
 		$resources = $this->GetResourcesWithWaitingList();
 
 		foreach ($resources as $resource)
@@ -129,7 +143,7 @@ class ReservationsAllocator
 	 */
 	private function GetResourcesWithWaitingList()
 	{
-		$resources = (new ResourceRepository())->GetResourceList();
+		$resources = $this->resourceRepository->GetResourceList();
 
 		foreach ($resources as $key => $resource)
 		{
@@ -157,6 +171,7 @@ class ReservationsAllocator
 	private function GetAllPriorities($sortedReservations)
 	{
 		$reversedPriorities = array();
+		$priorities = array();
 		$startDate = $this->today->SubtractMinutes(self::MINUTES_TO_SUBSTRACT);
 
 		foreach ($sortedReservations as $reservations)
@@ -179,7 +194,10 @@ class ReservationsAllocator
 			}
 		}
 
-		$maxPriority = max($reversedPriorities) + 1;
+		if (!empty($reversedPriorities))
+		{
+			$maxPriority = max($reversedPriorities) + 1;
+		}
 
 		foreach ($reversedPriorities as $userId => $reversedPriority)
 		{
@@ -220,6 +238,28 @@ class ReservationsAllocator
 	{
 		$reservationAllocations = array();
 		
+		while (count($reservations) > 0)
+		{
+			$reservationAllocations += $this->DetermineUserAllocations($reservations, $userPreferences, $priorities);
+			
+			foreach ($reservationAllocations as $seriesId => $value)
+			{
+				unset($reservations[$seriesId]);
+			}
+		}
+
+		return $reservationAllocations;
+	}
+	/**
+	 * @param array|ExistingReservationSeries[] $reservations
+	 * @param array|string[][] $userPreferences
+	 * @param array|int[] $priorities
+	 * @return array|int[]
+	 */
+	private function DetermineUserAllocations($reservations, $userPreferences, $priorities)
+	{
+		$reservationAllocations = array();
+		
 		// termination condition
 		if (empty($priorities) || empty($reservations))
 		{
@@ -244,7 +284,7 @@ class ReservationsAllocator
 				$tempReservationAllocations[$preferredReservationSlot] = $userIdToAllocate;
 			}
 			
-			$tempReservationAllocations += $this->DetermineReservationAllocations($remainingReservations, $userPreferences, $remainingPriorities);
+			$tempReservationAllocations += $this->DetermineUserAllocations($remainingReservations, $userPreferences, $remainingPriorities);
 			$reservationAllocations = $this->MaxPrioritySum($reservationAllocations, $tempReservationAllocations, $priorities);
 		}
 		while ($preferredReservationSlot !== null);
@@ -300,69 +340,99 @@ class ReservationsAllocator
 	}
 
 	/**
-	 * @param ExistingReservationSeries $reservation
-	 * @param string $userId
-	 * @return ExistingReservationSeries
+	 * @param array|ExistingReservationSeries[] &$reservations
 	 */
-	private function AllocateReservation(ExistingReservationSeries $reservation, $userId)
+	private function AllocateReservations(&$reservations, $reservationAllocations)
 	{
+		foreach ($reservations as $reservation)
+		{
+			if (!array_key_exists($reservation->SeriesId(), $reservationAllocations))
+			{
+				Log::Error("Can't allocate reservation ".$reservation->SeriesId().": No allocation determined");
+				continue;
+			}
 
+			$entry = $reservation->GetWaitingListEntry($reservationAllocations[$reservation->SeriesId()]);
+
+			if ($entry === null)
+			{
+				Log::Error("Can't allocate reservation ".$reservation->SeriesId().": Inconsistencies in waiting list and determined allocations");
+				continue;
+			}
+
+			$reservation->Update($entry->UserId(), $reservation->Resource(), $entry->Title(), $entry->Description(), $this->schedulerSession);
+			$reservation->SetStatusId(ReservationStatus::Created);
+			$reservation->RemoveRedundantAttachments($entry->UserId());
+
+			if (count($reservation->Instances()) > 1)
+			{
+				$reservation->ApplyChangesTo(SeriesUpdateScope::ThisInstance);
+			}
+
+			$this->reservationRepository->Update($reservation);
+		}
 	}
 
 	/**
-	 * @param array|ExistingReservationSeries[] $reservations
-	 * @return ExistingReservationSeries
+	 * @param array|ExistingReservationSeries[][] $sortedReservations
 	 */
-	private function Persist($reservations)
+	private function NotifyUsers($sortedReservations)
 	{
-		
+		$reservationsByUserId = array();
+
+		// sort reservations by user
+		foreach ($sortedReservations as $reservations)
+		{
+			foreach ($reservations as $reservation)
+			{
+				$reservationsByUserId[$reservation->UserId()][$reservation->SeriesId()] = $reservation;
+			}
+		}
+
+		foreach ($reservationsByUserId as $reservations)
+		{
+			ServiceLocator::GetEmailService()->Send(new ReservationsAssignedEmail($notice));
+		}
 	}
 
-	private function EchoResults($sortedReservations, $reservationAllocations)
+	/**
+	 * @param array|ExistingReservationSeries[][] $sortedReservations
+	 */
+	private function LogResults($sortedReservations)
 	{
+		if (empty($sortedReservations))
+		{
+			return;
+		}
+		
+		$resultString = "The following reservations have been allocated:";
+
 		foreach ($sortedReservations as $reservations)
 		{
 			if (!empty($reservations))
 			{
-				echo "\n".count($reservations)." ", current($reservations)->Resource()->GetName()."  ", current($reservations)->CurrentInstance()->StartDate()->Format('Y-m-d')."\n";
+				$resultString .= "\n".current($reservations)->Resource()->GetName()."  ".current($reservations)->CurrentInstance()->StartDate()->Format('Y-m-d')."\n";
+	
 				foreach ($reservations as $r)
 				{
-					echo "    ".$r->SeriesId()." ".$r->CurrentInstance()->StartDate()->Format('H:i:s')." (";
+					$resultString .= "   ".$r->CurrentInstance()->StartDate()->Format('H:i')."-".$r->CurrentInstance()->EndDate()->Format('H:i');
+					$resultString .= " assigned to ".$this->userRepository->LoadById($r->UserId())->FullName()." (User Id: ".$r->UserId().")";
+					
 					$wl = $r->GetWaitingList();
+					$resultString .= " (Waiting List: ";
+	
 					foreach ($wl as $entry)
 					{
-						echo $entry->UserId();
+						$resultString .= $entry->UserId();
 						if ($entry !== end($wl))
 						{
-							echo ", ";
+							$resultString .= ", ";
 						}
 					}
-					echo ") => ", $reservationAllocations[$r->SeriesId()]."\n";
+					$resultString .= ")\n";
 				}
-			}
-		}	
-	}
-
-	private function EchoResults2($sortedRservations)
-	{
-		echo "Sorted Reservations: ".count($sortedReservations)."\n";
-		foreach ($sortedRservations as $skey => $reservations)
-		{
-			echo "\n".$skey." -> ".count($reservations)." ", current($reservations)->Resource()->GetName()."  ", current($reservations)->CurrentInstance()->StartDate()->Format('Y-m-d')."\n";
-			foreach ($reservations as $key => $r)
-			{
-				echo "  ".$key." -> ".$r->SeriesId()." ".$r->CurrentInstance()->StartDate()->Format('H:i:s')." (";
-				$wl = $r->GetWaitingList();
-				foreach ($wl as $entry)
-				{
-					echo $entry->UserId();
-					if ($entry !== end($wl))
-					{
-						echo ", ";
-					}
-				}
-				echo ")\n";
 			}
 		}
+		Log::Debug($resultString);
 	}
 }

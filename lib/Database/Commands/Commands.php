@@ -2156,11 +2156,11 @@ class EditWaitingListCommand extends SqlCommand
 	}
 }
 
-class UpdateWaitingListCommand extends SqlCommand
+class CopyWaitingListCommand extends SqlCommand
 {
 	public function __construct($currentSeriesId, $newSeriesId)
 	{
-		parent::__construct(Queries::UPDATE_WAITING_LIST);
+		parent::__construct(Queries::COPY_WAITING_LIST);
 		$this->AddParameter(new Parameter(ParameterNames::SERIES_ID, $currentSeriesId));
 		$this->AddParameter(new Parameter(ParameterNames::NEW_SERIES_ID, $newSeriesId));
 	}

@@ -26,22 +26,22 @@ class ReservationWaitingListEntry
 	/**
 	 * @var string
 	 */
-	protected $userId;
+	private $userId;
 
 	/**
 	 * @var string
 	 */
-	protected $title;
+	private $title;
 
 	/**
 	 * @var string
 	 */
-	protected $description;
+	private $description;
 
 	/**
 	 * @var string
 	 */
-	protected $priority;
+	private $priority;
 
 	/**
 	 * @return string
