@@ -690,6 +690,21 @@ class ReservationSeries
 	}
 	
 	/**
+	 * @return bool
+	 */
+	public function IsWaitingListActive()
+	{
+		$schedulerId = (new UserRepository)->GetScheduler()->Id();
+
+		if ($schedulerId == $this->UserId())
+		{
+			return true;
+		}
+		
+		return false;
+	}
+
+	/**
 	 * @param UserSession $userSession
 	 * @return bool
 	 */

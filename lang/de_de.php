@@ -664,6 +664,7 @@ class de_de extends en_us
 		$strings['ReservationStartingSoonSubject'] = 'Ihre Reservierung für %s beginnt bald';
 		$strings['ReservationEndingSoonSubject'] = 'Ihre Reservierung für %s endet bald';
 		$strings['UserAdded'] = 'Ein neuer Benutzer wurde hinzugefügt';
+        $strings['ReservationsAssignedSubject'] = 'Reservierungen wurden verteilt';
         // End Email Subjects
         
         // WaitingList

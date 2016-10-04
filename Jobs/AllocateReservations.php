@@ -22,7 +22,7 @@ along with Booked Scheduler.  If not, see <http://www.gnu.org/licenses/>.
 /* Cron Example //
 //////////////////
 
-This script must be executed every minute for to enable Reservation Reminders functionality
+This script must be executed every hour for to enable Reservation Allocation functionality
 
 * * * * * php -f /home/mydomain/public_html/booked/Jobs/AllocateReservations.php
 * * * * * /path/to/php -f /home/mydomain/public_html/booked/Jobs/AllocateReservations.php
@@ -33,7 +33,7 @@ define('ROOT_DIR', dirname(__FILE__) . '/../');
 require_once(ROOT_DIR . 'Domain/Access/namespace.php');
 require_once(ROOT_DIR . 'lib/Application/Authentication/namespace.php');
 require_once(ROOT_DIR . 'lib/Application/Authorization/namespace.php');
-require_once(ROOT_DIR . 'lib/Email/namespace.php');
+require_once(ROOT_DIR . 'lib/Email/Messages/ReservationsAssignedEmail.php');
 require_once(ROOT_DIR . 'Jobs/JobCop.php');
 
 Log::Debug('Running AllocateReservations.php');
@@ -57,9 +57,9 @@ Log::Debug('Finished running AllocateReservations.php');
 
 class ReservationsAllocator
 {
-	const MINUTES_TO_SUBSTRACT = 40320; // 4 weeks
+	const PRIORITY_REVIEW_TIME = 40320; // 4 weeks in minutes
 
-	private $today;
+	private $startDate;
 	private $userRepository;
 	private $resourceRepository;
 	private $reservationViewRepository;
@@ -69,7 +69,8 @@ class ReservationsAllocator
 
 	public function __construct()
 	{
-		$this->today = Date::Now()->GetDate();
+		$this->start = microtime(true);
+		$this->startDate = Date::Now()->GetDate()->SubtractMinutes(1440); //yesterday
 		$this->userRepository = new UserRepository();
 		$this->resourceRepository = new ResourceRepository();
 		$this->reservationViewRepository = new ReservationViewRepository();
@@ -82,7 +83,6 @@ class ReservationsAllocator
 
 	public function Execute()
 	{
-		$start = microtime(true);
 		$reservationAllocations = array();
 		
 		$sortedReservations = $this->GetReservationsByResourcesByDay();
@@ -101,9 +101,6 @@ class ReservationsAllocator
 
 		$this->NotifyUsers($sortedReservations);
 		$this->LogResults($sortedReservations);
-		
-		$end = microtime(true);
-		echo $end - $start;
 	}
 
 
@@ -121,13 +118,13 @@ class ReservationsAllocator
 		foreach ($resources as $resource)
 		{
 			$reservationsByDay = array();
-			$endDate = $this->today->ApplyDifference($resource->GetMinNotice()->Interval());
-			$reservations = $this->reservationViewRepository->GetReservationList($this->today, $endDate, $schedulerId, null, null, $resource->GetId());
+			$endDate = $this->startDate->ApplyDifference($resource->GetMinNotice()->Interval());
+			$reservations = $this->reservationViewRepository->GetReservationList($this->startDate, $endDate, $schedulerId, null, null, $resource->GetId());
 
 			// sort reservations of $resource by day
 			foreach ($reservations as $reservation)
 			{
-				$day = (int)$this->today->GetDifference($reservation->StartDate)->Days();
+				$day = (int)$this->startDate->GetDifference($reservation->StartDate)->Days();
 				//replace ReservationItemView with ExistingReservationSeries at one go
 				$reservationsByDay[$day][$reservation->SeriesId] = $this->reservationRepository->LoadByReferenceNumber($reservation->GetReferenceNumber());
 			}
@@ -172,7 +169,7 @@ class ReservationsAllocator
 	{
 		$reversedPriorities = array();
 		$priorities = array();
-		$startDate = $this->today->SubtractMinutes(self::MINUTES_TO_SUBSTRACT);
+		$startDate = $this->startDate->SubtractMinutes(self::PRIORITY_REVIEW_TIME);
 
 		foreach ($sortedReservations as $reservations)
 		{
@@ -187,7 +184,7 @@ class ReservationsAllocator
 						continue;
 					}
 					
-					$previousReservations = $this->reservationViewRepository->GetReservationList($startDate, $this->today, $entry->UserId);
+					$previousReservations = $this->reservationViewRepository->GetReservationList($startDate, $this->startDate, $entry->UserId);
 					$reversedPriorities[$entry->UserId()] = count($previousReservations);
 
 				}
@@ -364,11 +361,6 @@ class ReservationsAllocator
 			$reservation->SetStatusId(ReservationStatus::Created);
 			$reservation->RemoveRedundantAttachments($entry->UserId());
 
-			if (count($reservation->Instances()) > 1)
-			{
-				$reservation->ApplyChangesTo(SeriesUpdateScope::ThisInstance);
-			}
-
 			$this->reservationRepository->Update($reservation);
 		}
 	}
@@ -389,9 +381,9 @@ class ReservationsAllocator
 			}
 		}
 
-		foreach ($reservationsByUserId as $reservations)
+		foreach ($reservationsByUserId as $userId => $reservations)
 		{
-			ServiceLocator::GetEmailService()->Send(new ReservationsAssignedEmail($notice));
+			ServiceLocator::GetEmailService()->Send(new ReservationsAssignedEmail($reservations, $this->userRepository->LoadById($userId), $this->scheduler));
 		}
 	}
 
@@ -405,13 +397,13 @@ class ReservationsAllocator
 			return;
 		}
 		
-		$resultString = "The following reservations have been allocated:";
+		$resultString = "The following reservations have been allocated: ";
 
 		foreach ($sortedReservations as $reservations)
 		{
 			if (!empty($reservations))
 			{
-				$resultString .= "\n".current($reservations)->Resource()->GetName()."  ".current($reservations)->CurrentInstance()->StartDate()->Format('Y-m-d')."\n";
+				$resultString .= "\n".current($reservations)->Resource()->GetName()."  ".current($reservations)->CurrentInstance()->StartDate()->Format('Y-m-d')." \n";
 	
 				foreach ($reservations as $r)
 				{
@@ -429,10 +421,12 @@ class ReservationsAllocator
 							$resultString .= ", ";
 						}
 					}
-					$resultString .= ")\n";
+					$resultString .= ") \n";
 				}
 			}
 		}
+		$this->end = microtime(true);
+		$resultString .= "Time to process: ".number_format($this->end - $this->start, 2)." seconds\n";
 		Log::Debug($resultString);
 	}
 }

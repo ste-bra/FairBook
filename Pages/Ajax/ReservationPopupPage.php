@@ -349,12 +349,16 @@ class ReservationPopupPresenter
 		
 		if ($reservation->IsWaitingListActive())
 		{
-			$entry = $reservation->GetWaitingListEntry($userSession->UserId);
-			
 			$this->_page->SetName('', '');
-			$this->_page->SetSummary($entry->Description());
-			$this->_page->SetTitle($entry->Title());
 			$this->_page->SetWaitingList($reservation->GetWaitingList());
+			
+			if ($reservation->IsUserOnWaitingList($userSession->UserId))
+			{
+				$entry = $reservation->GetWaitingListEntry($userSession->UserId);
+				$this->_page->SetSummary($entry->Description());
+				$this->_page->SetTitle($entry->Title());
+			}
+
 		}
 		else
 		{

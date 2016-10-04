@@ -695,6 +695,7 @@ class en_us extends Language
 		$strings['UserAdded'] = 'A new user has been added';
 		$strings['UserDeleted'] = 'User account for %s was deleted by %s';
 		$strings['AnnouncementSubject'] = 'A new announcement was posted by %s';
+		$strings['ReservationsAssignedSubject'] = 'Reservations have been assigned';
 		// End Email Subjects
 
 		// WaitingList
