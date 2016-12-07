@@ -118,7 +118,7 @@ class ReservationsAllocator
 		foreach ($resources as $resource)
 		{
 			$reservationsByDay = array();
-			$endDate = $this->startDate->ApplyDifference($resource->GetMinNotice()->Interval());
+			$endDate = $this->startDate->ApplyDifference($resource->GetMinNotice()->Interval())->AddDays(1);
 			$reservations = $this->reservationViewRepository->GetReservationList($this->startDate, $endDate, $schedulerId, null, null, $resource->GetId());
 
 			// sort reservations of $resource by day
@@ -394,6 +394,7 @@ class ReservationsAllocator
 	{
 		if (empty($sortedReservations))
 		{
+			Log::Debug("No reservations have been allocated");
 			return;
 		}
 		
