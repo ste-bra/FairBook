@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with Booked Scheduler.  If not, see <http://www.gnu.org/licenses/>.
 *}
 <div id="reservationCreated" class="reservationResponseMessage">
-	{if $RequiresApproval}
+	{if $RequiresApproval && !$UserJoinedWaitingList}
 		{html_image src="dialog-warning.png" id="imgApprovalWarning"}
 	{else}
 		{html_image src="dialog-success.png" id="imgReservationSuccess"}
