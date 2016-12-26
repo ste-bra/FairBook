@@ -141,3 +141,19 @@ along with Booked Scheduler.  If not, see <http://www.gnu.org/licenses/>.
 		{translate key='Print'}
 	</button>
 {/block}
+
+{block name='attachments'}
+	{if $IAmOnWaitingList}
+		<div style="clear:both">&nbsp;</div>
+
+		<div id="attachmentDiv" class="res-attachments">
+		<span class="heading">{translate key=Attachments} ({$Attachments|count})</span>
+		{if $Attachments|count > 0}
+			<a href="#" class="remove" id="btnRemoveAttachment">({translate key="Remove"})</a><br/>
+			{foreach from=$Attachments item=attachment}
+				<a href="attachments/{Pages::RESERVATION_FILE}?{QueryStringKeys::ATTACHMENT_FILE_ID}={$attachment->FileId()}&{QueryStringKeys::REFERENCE_NUMBER}={$ReferenceNumber}" target="_blank">{$attachment->FileName()}</a>&nbsp;<input style='display: none;' type="checkbox" name="{FormKeys::REMOVED_FILE_IDS}[{$attachment->FileId()}]" />&nbsp;
+			{/foreach}
+		{/if}
+		</div>
+	{/if}
+{/block}
