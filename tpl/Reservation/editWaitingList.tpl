@@ -18,6 +18,15 @@ along with Booked Scheduler.  If not, see <http://www.gnu.org/licenses/>.
 *}
 {extends file="Reservation/edit.tpl"}
 
+{if !$IAmOnWaitingList}
+	{block name=header}
+		{include file='globalheader.tpl' TitleKey='JoinReservationHeading' TitleArgs=$ReferenceNumber cssFiles='css/reservation.css,css/jquery.qtip.min.css,scripts/css/jqtree.css'}
+	{/block}
+
+	{block name=reservationHeader}
+		{translate key="JoinReservationHeading" args=$ReferenceNumber}
+	{/block}
+{/if}
 {block name="dates"}
 <div class="dateSection">
 <li>

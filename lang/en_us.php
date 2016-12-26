@@ -699,6 +699,7 @@ class en_us extends Language
 		// End Email Subjects
 
 		// WaitingList
+		$strings['JoinReservationHeading'] = 'Join Reservation %s';
 		$strings['NumberOfPeopleOnWaitingList'] = 'There are currently %s people on the waiting list';
 		$strings['IsOnWaitingList'] = 'You are on the waiting list';
 		$strings['IsNotOnWaitingList'] = 'You are not on the waiting list';

@@ -668,6 +668,7 @@ class de_de extends en_us
         // End Email Subjects
         
         // WaitingList
+        $strings['JoinReservationHeading'] = 'Reservierung %s beitreten';
         $strings['NumberOfPeopleOnWaitingList'] = 'Zur Zeit sind %s Leute auf der Warteliste';
         $strings['IsOnWaitingList'] = 'Sie sind auf der Warteliste';
         $strings['IsNotOnWaitingList'] = 'Sie sind nicht auf der Warteliste';
