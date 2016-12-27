@@ -64,7 +64,7 @@ class ReservationRepository implements IReservationRepository
 		$database = ServiceLocator::GetDatabase();
 
 		$seriesId = $this->InsertSeries($reservationSeries);
-		
+
 		$reservationSeries->SetSeriesId($seriesId);
 
 		$instances = $reservationSeries->Instances();

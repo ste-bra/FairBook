@@ -77,7 +77,7 @@ $conf['settings']['reservation']['updates.require.approval'] = 'false';		// if u
 $conf['settings']['reservation']['prevent.participation'] = 'false';		// if participation and invitation options should be removed
 $conf['settings']['reservation']['prevent.recurrence'] = 'false';			// if recurring reservations are disabled for non-administrators
 $conf['settings']['reservation']['enable.reminders'] = 'false';				// if reminders are enabled. this requires email to be enabled and the reminder job to be configured
-$conf['settings']['reservation']['waitinglist.scheduler'] = 'Scheduler';	// user name of the waitinglist scheduler
+$conf['settings']['reservation']['waitinglist.scheduler'] = 'Scheduler';	// username of the waiting list scheduler
 /**
  * Email notification configuration
  */

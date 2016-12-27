@@ -66,8 +66,8 @@ class ReservationDateBinder implements IReservationComponentBinder
 		$initializer->SetDates($startDate, $endDate, $startPeriods, $endPeriods);
 
 		$hideRecurrence = !$initializer->CurrentUser()->IsAdmin && Configuration::Instance()->GetSectionKey(ConfigSection::RESERVATION,
-			ConfigKeys::RESERVATION_PREVENT_RECURRENCE,
-			new BooleanConverter());
+																											ConfigKeys::RESERVATION_PREVENT_RECURRENCE,
+																											new BooleanConverter());
 		$initializer->HideRecurrence($hideRecurrence);
 	}
 }
@@ -106,8 +106,8 @@ class ReservationUserBinder implements IReservationComponentBinder
 		$initializer->SetReservationUser($reservationUser);
 
 		$hideUser = Configuration::Instance()->GetSectionKey(ConfigSection::PRIVACY,
-			ConfigKeys::PRIVACY_HIDE_USER_DETAILS,
-			new BooleanConverter());
+															 ConfigKeys::PRIVACY_HIDE_USER_DETAILS,
+															 new BooleanConverter());
 
 		$initializer->ShowUserDetails(!$hideUser || $currentUser->IsAdmin);
 		$initializer->SetShowParticipation(!$hideUser || $currentUser->IsAdmin || $currentUser->IsGroupAdmin);
@@ -147,8 +147,7 @@ class ReservationResourceBinder implements IReservationComponentBinder
 			return;
 		}
 
-		$currentUser = ServiceLocator::GetServer()->GetUserSession();
-		$hasWL = $resources[$requestedResourceId]->GetHasWaitingList() && !$currentUser->IsAdmin && !$currentUser->IsGroupAdmin;
+		$hasWL = $resources[$requestedResourceId]->GetHasWaitingList() && !$initializer->CurrentUser()->IsAdmin && !$initializer->CurrentUser()->IsGroupAdmin;
 
 		$initializer->SetHasActiveWaitingList($hasWL);
 		$initializer->BindResourceGroups($groups);
@@ -257,7 +256,7 @@ class ReservationDetailsBinder implements IReservationComponentBinder
 	private $privacyFilter;
 
 	public function __construct(IReservationAuthorization $reservationAuthorization, IExistingReservationPage $page,
-		ReservationView $reservationView, IPrivacyFilter $privacyFilter)
+								ReservationView $reservationView, IPrivacyFilter $privacyFilter)
 	{
 		$this->reservationAuthorization = $reservationAuthorization;
 		$this->page = $page;
@@ -315,12 +314,12 @@ class ReservationDetailsBinder implements IReservationComponentBinder
 		if (!empty($this->reservationView->StartReminder))
 		{
 			$this->page->SetStartReminder($this->reservationView->StartReminder->GetValue(),
-				$this->reservationView->StartReminder->GetInterval());
+										  $this->reservationView->StartReminder->GetInterval());
 		}
 		if (!empty($this->reservationView->EndReminder))
 		{
 			$this->page->SetEndReminder($this->reservationView->EndReminder->GetValue(),
-				$this->reservationView->EndReminder->GetInterval());
+										$this->reservationView->EndReminder->GetInterval());
 		}
 
 		if ($this->reservationView->IsWaitingListActive())
@@ -369,7 +368,7 @@ class ReservationDetailsBinder implements IReservationComponentBinder
 	 */
 	private function DetermineAttachments($currentUserId)
 	{
-		if (count($this->reservationView->GetWaitingList()) > 0)
+		if ($this->reservationView->IsWaitingListActive())
 		{
 			$attachments = array();
 			foreach ($this->reservationView->Attachments as $attachment)
@@ -390,11 +389,14 @@ class ReservationDetailsBinder implements IReservationComponentBinder
 	 */
 	private function DetermineTitle($UserId)
 	{
-		foreach ($this->reservationView->GetWaitingList() as $entry)
+		if ($this->reservationView->IsWaitingListActive())
 		{
-			if ($entry->UserId() == $UserId)
+			foreach ($this->reservationView->GetWaitingList() as $entry)
 			{
-				return $entry->Title();
+				if ($entry->UserId() == $UserId)
+				{
+					return $entry->Title();
+				}
 			}
 		}
 		return $this->reservationView->Title;
@@ -406,11 +408,14 @@ class ReservationDetailsBinder implements IReservationComponentBinder
 	 */
 	private function DetermineDescription($UserId)
 	{
-		foreach ($this->reservationView->GetWaitingList() as $entry)
+		if ($this->reservationView->IsWaitingListActive())
 		{
-			if ($entry->UserId() == $UserId)
+			foreach ($this->reservationView->GetWaitingList() as $entry)
 			{
-				return $entry->Description();
+				if ($entry->UserId() == $UserId)
+				{
+					return $entry->Description();
+				}
 			}
 		}
 		return $this->reservationView->Description;

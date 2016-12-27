@@ -1102,5 +1102,4 @@ class QueryBuilder
 						   'AND ' . self::$DATE_FRAGMENT . ' AND a.accessory_name LIKE @accessoryname');
 	}
 }
-
 ?>
