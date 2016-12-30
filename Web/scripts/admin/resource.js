@@ -357,6 +357,13 @@ function ResourceManagement(opts) {
 				$('#requiresApproval').val("1");
 			}
 		});
+
+		$('#requiresApproval').change(function() {
+			if ($(this).val() == "0")
+			{
+				$('#hasWaitingList').val("0");
+			}
+		});
 	};
 
 	ResourceManagement.prototype.add = function (resource) {
