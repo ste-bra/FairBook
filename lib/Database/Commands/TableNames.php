@@ -31,4 +31,5 @@ class TableNames
     const SCHEDULES_ALIAS = 's';
     const USERS = 'users';
     const USERS_ALIAS = 'u';
+    const WAITING_LIST = 'reservation_waiting_list';
 }
